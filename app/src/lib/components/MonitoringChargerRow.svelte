@@ -14,7 +14,7 @@
 	import { formatDistanceToNow } from 'date-fns';
 	import IconPlug from '$lib/icons/tabler/IconPlug.svelte';
 
-	const { charger }: { charger: InferResponseType<(typeof hClient)['charger']['$get']>[0] } =
+	const { charger }: { charger: InferResponseType<(typeof hClient)['charger']['$get']>['data'][0] } =
 		$props();
 
 	const queryConnectors = createQueryConnector(charger.id.toString(), 10000);
@@ -144,16 +144,12 @@
 	};
 
 	function getPhaseValue(
-		data: NonNullable<
-			NonNullable<typeof $queryConnectors.data>[0]['telemetry']
-		>['meterValue']['raw'],
-		phase: NonNullable<
-			NonNullable<typeof $queryConnectors.data>[0]['telemetry']
-		>['meterValue']['raw'][0]['sampledValue'][0]['phase']
+		data: any[],
+		phase: string
 	) {
 		for (const entry of data) {
 			const phaseData = entry.sampledValue.find(
-				(item) => item.phase === phase && item.measurand === 'Current.Import'
+				(item: any) => item.phase === phase && item.measurand === 'Current.Import'
 			);
 			if (phaseData) {
 				return `${phaseData.value} ${phaseData.unit ?? ''}`.trim();
@@ -163,16 +159,12 @@
 	}
 
 	function getMeasurandValue(
-		data: NonNullable<
-			NonNullable<typeof $queryConnectors.data>[0]['telemetry']
-		>['meterValue']['raw'],
-		measurand: NonNullable<
-			NonNullable<typeof $queryConnectors.data>[0]['telemetry']
-		>['meterValue']['raw'][0]['sampledValue'][0]['measurand']
+		data: any[],
+		measurand: string
 	) {
 		for (const entry of data) {
 			const measurandData = entry.sampledValue.find(
-				(item) => item.measurand === measurand && !item.phase
+				(item: any) => item.measurand === measurand && !item.phase
 			);
 			if (measurandData) {
 				return measurandData.value;
@@ -271,8 +263,8 @@
 	<div class="mt-6">
 		<h3 class="mb-4 text-xl font-bold">Connectors</h3>
 		<div class="space-y-4">
-			{#if $queryConnectors.data}
-				{#each $queryConnectors.data as connector}
+			{#if $queryConnectors.data?.data}
+				{#each $queryConnectors.data.data as connector}
 					<div
 						class="bg-base-300 flex w-full items-center justify-between rounded-lg p-4 shadow-md"
 					>

@@ -145,8 +145,8 @@
 		</div>
 		<Scrollable class="p-4" maxHeight="80svh">
 			<div class="space-y-6">
-				{#if $queryChargers.data}
-					{#each $queryChargers.data as charger}
+				{#if $queryChargers.data?.data}
+					{#each $queryChargers.data.data as charger}
 						<MonitoringChargerRow {charger} />
 					{/each}
 				{:else}

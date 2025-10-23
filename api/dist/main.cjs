@@ -33,9 +33,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// node_modules/ws/lib/stream.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/stream.js
 var require_stream = __commonJS({
-  "node_modules/ws/lib/stream.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/stream.js"(exports2, module2) {
     "use strict";
     var { Duplex } = require("stream");
     function emitClose(stream2) {
@@ -130,9 +130,9 @@ var require_stream = __commonJS({
   }
 });
 
-// node_modules/ws/lib/constants.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/constants.js
 var require_constants = __commonJS({
-  "node_modules/ws/lib/constants.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/constants.js"(exports2, module2) {
     "use strict";
     var BINARY_TYPES = ["nodebuffer", "arraybuffer", "fragments"];
     var hasBlob = typeof Blob !== "undefined";
@@ -152,9 +152,9 @@ var require_constants = __commonJS({
   }
 });
 
-// node_modules/ws/lib/buffer-util.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/buffer-util.js
 var require_buffer_util = __commonJS({
-  "node_modules/ws/lib/buffer-util.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/buffer-util.js"(exports2, module2) {
     "use strict";
     var { EMPTY_BUFFER } = require_constants();
     var FastBuffer = Buffer[Symbol.species];
@@ -227,9 +227,9 @@ var require_buffer_util = __commonJS({
   }
 });
 
-// node_modules/ws/lib/limiter.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/limiter.js
 var require_limiter = __commonJS({
-  "node_modules/ws/lib/limiter.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/limiter.js"(exports2, module2) {
     "use strict";
     var kDone = Symbol("kDone");
     var kRun = Symbol("kRun");
@@ -277,9 +277,9 @@ var require_limiter = __commonJS({
   }
 });
 
-// node_modules/ws/lib/permessage-deflate.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/permessage-deflate.js
 var require_permessage_deflate = __commonJS({
-  "node_modules/ws/lib/permessage-deflate.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/permessage-deflate.js"(exports2, module2) {
     "use strict";
     var zlib = require("zlib");
     var bufferUtil = require_buffer_util();
@@ -656,9 +656,9 @@ var require_permessage_deflate = __commonJS({
   }
 });
 
-// node_modules/ws/lib/validation.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/validation.js
 var require_validation = __commonJS({
-  "node_modules/ws/lib/validation.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/validation.js"(exports2, module2) {
     "use strict";
     var { isUtf8 } = require("buffer");
     var { hasBlob } = require_constants();
@@ -857,9 +857,9 @@ var require_validation = __commonJS({
   }
 });
 
-// node_modules/ws/lib/receiver.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/receiver.js
 var require_receiver = __commonJS({
-  "node_modules/ws/lib/receiver.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/receiver.js"(exports2, module2) {
     "use strict";
     var { Writable } = require("stream");
     var PerMessageDeflate = require_permessage_deflate();
@@ -1449,9 +1449,9 @@ var require_receiver = __commonJS({
   }
 });
 
-// node_modules/ws/lib/sender.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/sender.js
 var require_sender = __commonJS({
-  "node_modules/ws/lib/sender.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/sender.js"(exports2, module2) {
     "use strict";
     var { Duplex } = require("stream");
     var { randomFillSync } = require("crypto");
@@ -1937,9 +1937,9 @@ var require_sender = __commonJS({
   }
 });
 
-// node_modules/ws/lib/event-target.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/event-target.js
 var require_event_target = __commonJS({
-  "node_modules/ws/lib/event-target.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/event-target.js"(exports2, module2) {
     "use strict";
     var { kForOnEventAttribute, kListener } = require_constants();
     var kCode = Symbol("kCode");
@@ -2166,9 +2166,9 @@ var require_event_target = __commonJS({
   }
 });
 
-// node_modules/ws/lib/extension.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/extension.js
 var require_extension = __commonJS({
-  "node_modules/ws/lib/extension.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/extension.js"(exports2, module2) {
     "use strict";
     var { tokenChars } = require_validation();
     function push(dest, name, elem) {
@@ -2319,9 +2319,9 @@ var require_extension = __commonJS({
   }
 });
 
-// node_modules/ws/lib/websocket.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/websocket.js
 var require_websocket = __commonJS({
-  "node_modules/ws/lib/websocket.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/websocket.js"(exports2, module2) {
     "use strict";
     var EventEmitter = require("events");
     var https = require("https");
@@ -3202,9 +3202,9 @@ var require_websocket = __commonJS({
   }
 });
 
-// node_modules/ws/lib/subprotocol.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/subprotocol.js
 var require_subprotocol = __commonJS({
-  "node_modules/ws/lib/subprotocol.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/subprotocol.js"(exports2, module2) {
     "use strict";
     var { tokenChars } = require_validation();
     function parse2(header) {
@@ -3247,9 +3247,9 @@ var require_subprotocol = __commonJS({
   }
 });
 
-// node_modules/ws/lib/websocket-server.js
+// node_modules/@hono/node-ws/node_modules/ws/lib/websocket-server.js
 var require_websocket_server = __commonJS({
-  "node_modules/ws/lib/websocket-server.js"(exports2, module2) {
+  "node_modules/@hono/node-ws/node_modules/ws/lib/websocket-server.js"(exports2, module2) {
     "use strict";
     var EventEmitter = require("events");
     var http = require("http");
@@ -14517,9 +14517,9 @@ var require_winston = __commonJS({
   }
 });
 
-// node_modules/postgres-array/index.js
+// node_modules/pg/node_modules/postgres-array/index.js
 var require_postgres_array = __commonJS({
-  "node_modules/postgres-array/index.js"(exports2) {
+  "node_modules/pg/node_modules/postgres-array/index.js"(exports2) {
     "use strict";
     exports2.parse = function(source, transform) {
       return new ArrayParser(source, transform).parse();
@@ -14611,9 +14611,9 @@ var require_postgres_array = __commonJS({
   }
 });
 
-// node_modules/pg-types/lib/arrayParser.js
+// node_modules/pg/node_modules/pg-types/lib/arrayParser.js
 var require_arrayParser = __commonJS({
-  "node_modules/pg-types/lib/arrayParser.js"(exports2, module2) {
+  "node_modules/pg/node_modules/pg-types/lib/arrayParser.js"(exports2, module2) {
     var array = require_postgres_array();
     module2.exports = {
       create: function(source, transform) {
@@ -14627,9 +14627,9 @@ var require_arrayParser = __commonJS({
   }
 });
 
-// node_modules/postgres-date/index.js
+// node_modules/pg/node_modules/postgres-date/index.js
 var require_postgres_date = __commonJS({
-  "node_modules/postgres-date/index.js"(exports2, module2) {
+  "node_modules/pg/node_modules/postgres-date/index.js"(exports2, module2) {
     "use strict";
     var DATE_TIME = /(\d{1,})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})(\.\d{1,})?.*?( BC)?$/;
     var DATE = /^(\d{1,})-(\d{2})-(\d{2})( BC)?$/;
@@ -14733,9 +14733,9 @@ var require_mutable = __commonJS({
   }
 });
 
-// node_modules/postgres-interval/index.js
+// node_modules/pg/node_modules/postgres-interval/index.js
 var require_postgres_interval = __commonJS({
-  "node_modules/postgres-interval/index.js"(exports2, module2) {
+  "node_modules/pg/node_modules/postgres-interval/index.js"(exports2, module2) {
     "use strict";
     var extend = require_mutable();
     module2.exports = PostgresInterval;
@@ -14824,9 +14824,9 @@ var require_postgres_interval = __commonJS({
   }
 });
 
-// node_modules/postgres-bytea/index.js
+// node_modules/pg/node_modules/postgres-bytea/index.js
 var require_postgres_bytea = __commonJS({
-  "node_modules/postgres-bytea/index.js"(exports2, module2) {
+  "node_modules/pg/node_modules/postgres-bytea/index.js"(exports2, module2) {
     "use strict";
     module2.exports = function parseBytea(input) {
       if (/^\\x/.test(input)) {
@@ -14859,9 +14859,9 @@ var require_postgres_bytea = __commonJS({
   }
 });
 
-// node_modules/pg-types/lib/textParsers.js
+// node_modules/pg/node_modules/pg-types/lib/textParsers.js
 var require_textParsers = __commonJS({
-  "node_modules/pg-types/lib/textParsers.js"(exports2, module2) {
+  "node_modules/pg/node_modules/pg-types/lib/textParsers.js"(exports2, module2) {
     var array = require_postgres_array();
     var arrayParser = require_arrayParser();
     var parseDate = require_postgres_date();
@@ -15139,9 +15139,9 @@ var require_pg_int8 = __commonJS({
   }
 });
 
-// node_modules/pg-types/lib/binaryParsers.js
+// node_modules/pg/node_modules/pg-types/lib/binaryParsers.js
 var require_binaryParsers = __commonJS({
-  "node_modules/pg-types/lib/binaryParsers.js"(exports2, module2) {
+  "node_modules/pg/node_modules/pg-types/lib/binaryParsers.js"(exports2, module2) {
     var parseInt64 = require_pg_int8();
     var parseBits = function(data, bits, offset, invert, callback) {
       offset = offset || 0;
@@ -15339,9 +15339,9 @@ var require_binaryParsers = __commonJS({
   }
 });
 
-// node_modules/pg-types/lib/builtins.js
+// node_modules/pg/node_modules/pg-types/lib/builtins.js
 var require_builtins = __commonJS({
-  "node_modules/pg-types/lib/builtins.js"(exports2, module2) {
+  "node_modules/pg/node_modules/pg-types/lib/builtins.js"(exports2, module2) {
     module2.exports = {
       BOOL: 16,
       BYTEA: 17,
@@ -15407,9 +15407,9 @@ var require_builtins = __commonJS({
   }
 });
 
-// node_modules/pg-types/index.js
+// node_modules/pg/node_modules/pg-types/index.js
 var require_pg_types = __commonJS({
-  "node_modules/pg-types/index.js"(exports2) {
+  "node_modules/pg/node_modules/pg-types/index.js"(exports2) {
     var textParsers = require_textParsers();
     var binaryParsers = require_binaryParsers();
     var arrayParser = require_arrayParser();
@@ -15551,27 +15551,27 @@ var require_utils = __commonJS({
       if (val == null) {
         return null;
       }
-      if (val instanceof Buffer) {
-        return val;
-      }
-      if (ArrayBuffer.isView(val)) {
-        var buf = Buffer.from(val.buffer, val.byteOffset, val.byteLength);
-        if (buf.length === val.byteLength) {
-          return buf;
-        }
-        return buf.slice(val.byteOffset, val.byteOffset + val.byteLength);
-      }
-      if (val instanceof Date) {
-        if (defaults.parseInputDatesAsUTC) {
-          return dateToStringUTC(val);
-        } else {
-          return dateToString(val);
-        }
-      }
-      if (Array.isArray(val)) {
-        return arrayString(val);
-      }
       if (typeof val === "object") {
+        if (val instanceof Buffer) {
+          return val;
+        }
+        if (ArrayBuffer.isView(val)) {
+          var buf = Buffer.from(val.buffer, val.byteOffset, val.byteLength);
+          if (buf.length === val.byteLength) {
+            return buf;
+          }
+          return buf.slice(val.byteOffset, val.byteOffset + val.byteLength);
+        }
+        if (val instanceof Date) {
+          if (defaults.parseInputDatesAsUTC) {
+            return dateToStringUTC(val);
+          } else {
+            return dateToString(val);
+          }
+        }
+        if (Array.isArray(val)) {
+          return arrayString(val);
+        }
         return prepareObject(val, seen);
       }
       return val.toString();
@@ -15587,26 +15587,19 @@ var require_utils = __commonJS({
       }
       return JSON.stringify(val);
     }
-    function pad(number, digits) {
-      number = "" + number;
-      while (number.length < digits) {
-        number = "0" + number;
-      }
-      return number;
-    }
     function dateToString(date) {
       var offset = -date.getTimezoneOffset();
       var year = date.getFullYear();
       var isBCYear = year < 1;
       if (isBCYear) year = Math.abs(year) + 1;
-      var ret = pad(year, 4) + "-" + pad(date.getMonth() + 1, 2) + "-" + pad(date.getDate(), 2) + "T" + pad(date.getHours(), 2) + ":" + pad(date.getMinutes(), 2) + ":" + pad(date.getSeconds(), 2) + "." + pad(date.getMilliseconds(), 3);
+      var ret = String(year).padStart(4, "0") + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0") + "T" + String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0") + ":" + String(date.getSeconds()).padStart(2, "0") + "." + String(date.getMilliseconds()).padStart(3, "0");
       if (offset < 0) {
         ret += "-";
         offset *= -1;
       } else {
         ret += "+";
       }
-      ret += pad(Math.floor(offset / 60), 2) + ":" + pad(offset % 60, 2);
+      ret += String(Math.floor(offset / 60)).padStart(2, "0") + ":" + String(offset % 60).padStart(2, "0");
       if (isBCYear) ret += " BC";
       return ret;
     }
@@ -15614,7 +15607,7 @@ var require_utils = __commonJS({
       var year = date.getUTCFullYear();
       var isBCYear = year < 1;
       if (isBCYear) year = Math.abs(year) + 1;
-      var ret = pad(year, 4) + "-" + pad(date.getUTCMonth() + 1, 2) + "-" + pad(date.getUTCDate(), 2) + "T" + pad(date.getUTCHours(), 2) + ":" + pad(date.getUTCMinutes(), 2) + ":" + pad(date.getUTCSeconds(), 2) + "." + pad(date.getUTCMilliseconds(), 3);
+      var ret = String(year).padStart(4, "0") + "-" + String(date.getUTCMonth() + 1).padStart(2, "0") + "-" + String(date.getUTCDate()).padStart(2, "0") + "T" + String(date.getUTCHours()).padStart(2, "0") + ":" + String(date.getUTCMinutes()).padStart(2, "0") + ":" + String(date.getUTCSeconds()).padStart(2, "0") + "." + String(date.getUTCMilliseconds()).padStart(3, "0");
       ret += "+00:00";
       if (isBCYear) ret += " BC";
       return ret;
@@ -15683,6 +15676,10 @@ var require_utils_legacy = __commonJS({
     function sha2562(text) {
       return nodeCrypto.createHash("sha256").update(text).digest();
     }
+    function hashByName(hashName, text) {
+      hashName = hashName.replace(/(\D)-/, "$1");
+      return nodeCrypto.createHash(hashName).update(text).digest();
+    }
     function hmacSha256(key, msg) {
       return nodeCrypto.createHmac("sha256", key).update(msg).digest();
     }
@@ -15694,6 +15691,7 @@ var require_utils_legacy = __commonJS({
       randomBytes: nodeCrypto.randomBytes,
       deriveKey,
       sha256: sha2562,
+      hashByName,
       hmacSha256,
       md5
     };
@@ -15709,6 +15707,7 @@ var require_utils_webcrypto = __commonJS({
       randomBytes,
       deriveKey,
       sha256: sha2562,
+      hashByName,
       hmacSha256,
       md5
     };
@@ -15735,6 +15734,9 @@ var require_utils_webcrypto = __commonJS({
     async function sha2562(text) {
       return await subtleCrypto.digest("SHA-256", text);
     }
+    async function hashByName(hashName, text) {
+      return await subtleCrypto.digest(hashName, text);
+    }
     async function hmacSha256(keyBuffer, msg) {
       const key = await subtleCrypto.importKey("raw", keyBuffer, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
       return await subtleCrypto.sign("HMAC", key, textEncoder.encode(msg));
@@ -15760,24 +15762,144 @@ var require_utils2 = __commonJS({
   }
 });
 
+// node_modules/pg/lib/crypto/cert-signatures.js
+var require_cert_signatures = __commonJS({
+  "node_modules/pg/lib/crypto/cert-signatures.js"(exports2, module2) {
+    function x509Error(msg, cert) {
+      throw new Error("SASL channel binding: " + msg + " when parsing public certificate " + cert.toString("base64"));
+    }
+    function readASN1Length(data, index) {
+      let length = data[index++];
+      if (length < 128) return { length, index };
+      const lengthBytes = length & 127;
+      if (lengthBytes > 4) x509Error("bad length", data);
+      length = 0;
+      for (let i = 0; i < lengthBytes; i++) {
+        length = length << 8 | data[index++];
+      }
+      return { length, index };
+    }
+    function readASN1OID(data, index) {
+      if (data[index++] !== 6) x509Error("non-OID data", data);
+      const { length: OIDLength, index: indexAfterOIDLength } = readASN1Length(data, index);
+      index = indexAfterOIDLength;
+      lastIndex = index + OIDLength;
+      const byte1 = data[index++];
+      let oid = (byte1 / 40 >> 0) + "." + byte1 % 40;
+      while (index < lastIndex) {
+        let value = 0;
+        while (index < lastIndex) {
+          const nextByte = data[index++];
+          value = value << 7 | nextByte & 127;
+          if (nextByte < 128) break;
+        }
+        oid += "." + value;
+      }
+      return { oid, index };
+    }
+    function expectASN1Seq(data, index) {
+      if (data[index++] !== 48) x509Error("non-sequence data", data);
+      return readASN1Length(data, index);
+    }
+    function signatureAlgorithmHashFromCertificate(data, index) {
+      if (index === void 0) index = 0;
+      index = expectASN1Seq(data, index).index;
+      const { length: certInfoLength, index: indexAfterCertInfoLength } = expectASN1Seq(data, index);
+      index = indexAfterCertInfoLength + certInfoLength;
+      index = expectASN1Seq(data, index).index;
+      const { oid, index: indexAfterOID } = readASN1OID(data, index);
+      switch (oid) {
+        // RSA
+        case "1.2.840.113549.1.1.4":
+          return "MD5";
+        case "1.2.840.113549.1.1.5":
+          return "SHA-1";
+        case "1.2.840.113549.1.1.11":
+          return "SHA-256";
+        case "1.2.840.113549.1.1.12":
+          return "SHA-384";
+        case "1.2.840.113549.1.1.13":
+          return "SHA-512";
+        case "1.2.840.113549.1.1.14":
+          return "SHA-224";
+        case "1.2.840.113549.1.1.15":
+          return "SHA512-224";
+        case "1.2.840.113549.1.1.16":
+          return "SHA512-256";
+        // ECDSA
+        case "1.2.840.10045.4.1":
+          return "SHA-1";
+        case "1.2.840.10045.4.3.1":
+          return "SHA-224";
+        case "1.2.840.10045.4.3.2":
+          return "SHA-256";
+        case "1.2.840.10045.4.3.3":
+          return "SHA-384";
+        case "1.2.840.10045.4.3.4":
+          return "SHA-512";
+        // RSASSA-PSS: hash is indicated separately
+        case "1.2.840.113549.1.1.10":
+          index = indexAfterOID;
+          index = expectASN1Seq(data, index).index;
+          if (data[index++] !== 160) x509Error("non-tag data", data);
+          index = readASN1Length(data, index).index;
+          index = expectASN1Seq(data, index).index;
+          const { oid: hashOID } = readASN1OID(data, index);
+          switch (hashOID) {
+            // standalone hash OIDs
+            case "1.2.840.113549.2.5":
+              return "MD5";
+            case "1.3.14.3.2.26":
+              return "SHA-1";
+            case "2.16.840.1.101.3.4.2.1":
+              return "SHA-256";
+            case "2.16.840.1.101.3.4.2.2":
+              return "SHA-384";
+            case "2.16.840.1.101.3.4.2.3":
+              return "SHA-512";
+          }
+          x509Error("unknown hash OID " + hashOID, data);
+        // Ed25519 -- see https: return//github.com/openssl/openssl/issues/15477
+        case "1.3.101.110":
+        case "1.3.101.112":
+          return "SHA-512";
+        // Ed448 -- still not in pg 17.2 (if supported, digest would be SHAKE256 x 64 bytes)
+        case "1.3.101.111":
+        case "1.3.101.113":
+          x509Error("Ed448 certificate channel binding is not currently supported by Postgres");
+      }
+      x509Error("unknown OID " + oid, data);
+    }
+    module2.exports = { signatureAlgorithmHashFromCertificate };
+  }
+});
+
 // node_modules/pg/lib/crypto/sasl.js
 var require_sasl = __commonJS({
   "node_modules/pg/lib/crypto/sasl.js"(exports2, module2) {
     "use strict";
     var crypto3 = require_utils2();
-    function startSession(mechanisms) {
-      if (mechanisms.indexOf("SCRAM-SHA-256") === -1) {
-        throw new Error("SASL: Only mechanism SCRAM-SHA-256 is currently supported");
+    var { signatureAlgorithmHashFromCertificate } = require_cert_signatures();
+    function startSession(mechanisms, stream2) {
+      const candidates = ["SCRAM-SHA-256"];
+      if (stream2) candidates.unshift("SCRAM-SHA-256-PLUS");
+      const mechanism = candidates.find((candidate) => mechanisms.includes(candidate));
+      if (!mechanism) {
+        throw new Error("SASL: Only mechanism(s) " + candidates.join(" and ") + " are supported");
+      }
+      if (mechanism === "SCRAM-SHA-256-PLUS" && typeof stream2.getPeerCertificate !== "function") {
+        throw new Error("SASL: Mechanism SCRAM-SHA-256-PLUS requires a certificate");
       }
       const clientNonce = crypto3.randomBytes(18).toString("base64");
+      const gs2Header = mechanism === "SCRAM-SHA-256-PLUS" ? "p=tls-server-end-point" : stream2 ? "y" : "n";
       return {
-        mechanism: "SCRAM-SHA-256",
+        mechanism,
         clientNonce,
-        response: "n,,n=*,r=" + clientNonce,
+        response: gs2Header + ",,n=*,r=" + clientNonce,
         message: "SASLInitialResponse"
       };
     }
-    async function continueSession(session, password, serverData) {
+    async function continueSession(session, password, serverData, stream2) {
       if (session.message !== "SASLInitialResponse") {
         throw new Error("SASL: Last message was not SASLInitialResponse");
       }
@@ -15798,7 +15920,16 @@ var require_sasl = __commonJS({
       }
       var clientFirstMessageBare = "n=*,r=" + session.clientNonce;
       var serverFirstMessage = "r=" + sv.nonce + ",s=" + sv.salt + ",i=" + sv.iteration;
-      var clientFinalMessageWithoutProof = "c=biws,r=" + sv.nonce;
+      let channelBinding = stream2 ? "eSws" : "biws";
+      if (session.mechanism === "SCRAM-SHA-256-PLUS") {
+        const peerCert = stream2.getPeerCertificate().raw;
+        let hashName = signatureAlgorithmHashFromCertificate(peerCert);
+        if (hashName === "MD5" || hashName === "SHA-1") hashName = "SHA-256";
+        const certHash = await crypto3.hashByName(hashName, peerCert);
+        const bindingData = Buffer.concat([Buffer.from("p=tls-server-end-point,,"), Buffer.from(certHash)]);
+        channelBinding = bindingData.toString("base64");
+      }
+      var clientFinalMessageWithoutProof = "c=" + channelBinding + ",r=" + sv.nonce;
       var authMessage = clientFirstMessageBare + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
       var saltBytes = Buffer.from(sv.salt, "base64");
       var saltedPassword = await crypto3.deriveKey(password, saltBytes, sv.iteration);
@@ -16390,7 +16521,12 @@ var require_query = __commonJS({
           return new Error("Query values must be an array");
         }
         if (this.requiresPreparation()) {
-          this.prepare(connection);
+          connection.stream.cork && connection.stream.cork();
+          try {
+            this.prepare(connection);
+          } finally {
+            connection.stream.uncork && connection.stream.uncork();
+          }
         } else {
           connection.query(this.text);
         }
@@ -16451,9 +16587,9 @@ var require_query = __commonJS({
   }
 });
 
-// node_modules/pg-protocol/dist/messages.js
+// node_modules/pg/node_modules/pg-protocol/dist/messages.js
 var require_messages = __commonJS({
-  "node_modules/pg-protocol/dist/messages.js"(exports2) {
+  "node_modules/pg/node_modules/pg-protocol/dist/messages.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NoticeMessage = exports2.DataRowMessage = exports2.CommandCompleteMessage = exports2.ReadyForQueryMessage = exports2.NotificationResponseMessage = exports2.BackendKeyDataMessage = exports2.AuthenticationMD5Password = exports2.ParameterStatusMessage = exports2.ParameterDescriptionMessage = exports2.RowDescriptionMessage = exports2.Field = exports2.CopyResponse = exports2.CopyDataMessage = exports2.DatabaseError = exports2.copyDone = exports2.emptyQuery = exports2.replicationStart = exports2.portalSuspended = exports2.noData = exports2.closeComplete = exports2.bindComplete = exports2.parseComplete = void 0;
@@ -16616,9 +16752,9 @@ var require_messages = __commonJS({
   }
 });
 
-// node_modules/pg-protocol/dist/buffer-writer.js
+// node_modules/pg/node_modules/pg-protocol/dist/buffer-writer.js
 var require_buffer_writer = __commonJS({
-  "node_modules/pg-protocol/dist/buffer-writer.js"(exports2) {
+  "node_modules/pg/node_modules/pg-protocol/dist/buffer-writer.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Writer = void 0;
@@ -16697,9 +16833,9 @@ var require_buffer_writer = __commonJS({
   }
 });
 
-// node_modules/pg-protocol/dist/serializer.js
+// node_modules/pg/node_modules/pg-protocol/dist/serializer.js
 var require_serializer = __commonJS({
-  "node_modules/pg-protocol/dist/serializer.js"(exports2) {
+  "node_modules/pg/node_modules/pg-protocol/dist/serializer.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.serialize = void 0;
@@ -16913,9 +17049,9 @@ var require_serializer = __commonJS({
   }
 });
 
-// node_modules/pg-protocol/dist/buffer-reader.js
+// node_modules/pg/node_modules/pg-protocol/dist/buffer-reader.js
 var require_buffer_reader = __commonJS({
-  "node_modules/pg-protocol/dist/buffer-reader.js"(exports2) {
+  "node_modules/pg/node_modules/pg-protocol/dist/buffer-reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.BufferReader = void 0;
@@ -16945,6 +17081,11 @@ var require_buffer_reader = __commonJS({
         this.offset += 4;
         return result;
       }
+      uint32() {
+        const result = this.buffer.readUInt32BE(this.offset);
+        this.offset += 4;
+        return result;
+      }
       string(length) {
         const result = this.buffer.toString(this.encoding, this.offset, this.offset + length);
         this.offset += length;
@@ -16968,9 +17109,9 @@ var require_buffer_reader = __commonJS({
   }
 });
 
-// node_modules/pg-protocol/dist/parser.js
+// node_modules/pg/node_modules/pg-protocol/dist/parser.js
 var require_parser = __commonJS({
-  "node_modules/pg-protocol/dist/parser.js"(exports2) {
+  "node_modules/pg/node_modules/pg-protocol/dist/parser.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Parser = void 0;
@@ -17141,9 +17282,9 @@ var require_parser = __commonJS({
       }
       parseField() {
         const name = this.reader.cstring();
-        const tableID = this.reader.int32();
+        const tableID = this.reader.uint32();
         const columnID = this.reader.int16();
-        const dataTypeID = this.reader.int32();
+        const dataTypeID = this.reader.uint32();
         const dataTypeSize = this.reader.int16();
         const dataTypeModifier = this.reader.int32();
         const mode = this.reader.int16() === 0 ? "text" : "binary";
@@ -17259,9 +17400,9 @@ var require_parser = __commonJS({
   }
 });
 
-// node_modules/pg-protocol/dist/index.js
+// node_modules/pg/node_modules/pg-protocol/dist/index.js
 var require_dist = __commonJS({
-  "node_modules/pg-protocol/dist/index.js"(exports2) {
+  "node_modules/pg/node_modules/pg-protocol/dist/index.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DatabaseError = exports2.serialize = exports2.parse = void 0;
@@ -17875,6 +18016,7 @@ var require_client = __commonJS({
         this._connected = false;
         this._connectionError = false;
         this._queryable = true;
+        this.enableChannelBinding = Boolean(c.enableChannelBinding);
         this.connection = c.connection || new Connection({
           stream: c.stream,
           ssl: this.connectionParameters.ssl,
@@ -17924,6 +18066,9 @@ var require_client = __commonJS({
             con._ending = true;
             con.stream.destroy(new Error("timeout expired"));
           }, this._connectionTimeoutMillis);
+          if (this.connectionTimeoutHandle.unref) {
+            this.connectionTimeoutHandle.unref();
+          }
         }
         if (this.host && this.host.indexOf("/") === 0) {
           con.connect(this.host + "/.s.PGSQL." + this.port);
@@ -18051,7 +18196,7 @@ var require_client = __commonJS({
       _handleAuthSASL(msg) {
         this._checkPgPass(() => {
           try {
-            this.saslSession = sasl.startSession(msg.mechanisms);
+            this.saslSession = sasl.startSession(msg.mechanisms, this.enableChannelBinding && this.connection.stream);
             this.connection.sendSASLInitialResponseMessage(this.saslSession.mechanism, this.saslSession.response);
           } catch (err) {
             this.connection.emit("error", err);
@@ -18060,7 +18205,12 @@ var require_client = __commonJS({
       }
       async _handleAuthSASLContinue(msg) {
         try {
-          await sasl.continueSession(this.saslSession, this.password, msg.data);
+          await sasl.continueSession(
+            this.saslSession,
+            this.password,
+            msg.data,
+            this.enableChannelBinding && this.connection.stream
+          );
           this.connection.sendSCRAMClientFinalMessage(this.saslSession.response);
         } catch (err) {
           this.connection.emit("error", err);
@@ -18524,6 +18674,9 @@ var require_pg_pool = __commonJS({
             pendingItem.timedOut = true;
             response.callback(new Error("timeout exceeded when trying to connect"));
           }, this.options.connectionTimeoutMillis);
+          if (tid.unref) {
+            tid.unref();
+          }
           this._pendingQueue.push(pendingItem);
           return result;
         }
@@ -18554,7 +18707,7 @@ var require_pg_pool = __commonJS({
             this.log("client failed to connect", err);
             this._clients = this._clients.filter((c) => c !== client);
             if (timeoutHit) {
-              err.message = "Connection terminated due to connection timeout";
+              err = new Error("Connection terminated due to connection timeout", { cause: err });
             }
             this._pulseQueue();
             if (!pendingItem.timedOut) {
@@ -19527,6 +19680,50 @@ __export(main_exports, {
 module.exports = __toCommonJS(main_exports);
 var import_path2 = __toESM(require("path"), 1);
 
+// node_modules/hono/dist/compose.js
+var compose = (middleware, onError, onNotFound) => {
+  return (context, next) => {
+    let index = -1;
+    return dispatch(0);
+    async function dispatch(i) {
+      if (i <= index) {
+        throw new Error("next() called multiple times");
+      }
+      index = i;
+      let res;
+      let isError = false;
+      let handler2;
+      if (middleware[i]) {
+        handler2 = middleware[i][0][0];
+        context.req.routeIndex = i;
+      } else {
+        handler2 = i === middleware.length && next || void 0;
+      }
+      if (handler2) {
+        try {
+          res = await handler2(context, () => dispatch(i + 1));
+        } catch (err) {
+          if (err instanceof Error && onError) {
+            context.error = err;
+            res = await onError(err, context);
+            isError = true;
+          } else {
+            throw err;
+          }
+        }
+      } else {
+        if (context.finalized === false && onNotFound) {
+          res = await onNotFound(context);
+        }
+      }
+      if (res && (context.finalized === false || isError)) {
+        context.res = res;
+      }
+      return context;
+    }
+  };
+};
+
 // node_modules/hono/dist/utils/body.js
 var parseBody = async (request, options = /* @__PURE__ */ Object.create(null)) => {
   const { all = false, dot = false } = options;
@@ -19627,20 +19824,21 @@ var replaceGroupMarks = (paths, groups) => {
   return paths;
 };
 var patternCache = {};
-var getPattern = (label) => {
+var getPattern = (label, next) => {
   if (label === "*") {
     return "*";
   }
   const match = label.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);
   if (match) {
-    if (!patternCache[label]) {
+    const cacheKey2 = `${label}#${next}`;
+    if (!patternCache[cacheKey2]) {
       if (match[2]) {
-        patternCache[label] = [label, match[1], new RegExp("^" + match[2] + "$")];
+        patternCache[cacheKey2] = next && next[0] !== ":" && next[0] !== "*" ? [cacheKey2, match[1], new RegExp(`^${match[2]}(?=/${next})`)] : [label, match[1], new RegExp(`^${match[2]}$`)];
       } else {
-        patternCache[label] = [label, match[1], true];
+        patternCache[cacheKey2] = [label, match[1], true];
       }
     }
-    return patternCache[label];
+    return patternCache[cacheKey2];
   }
   return null;
 };
@@ -19678,30 +19876,14 @@ var getPathNoStrict = (request) => {
   const result = getPath(request);
   return result.length > 1 && result.at(-1) === "/" ? result.slice(0, -1) : result;
 };
-var mergePath = (...paths) => {
-  let p = "";
-  let endsWithSlash = false;
-  for (let path3 of paths) {
-    if (p.at(-1) === "/") {
-      p = p.slice(0, -1);
-      endsWithSlash = true;
-    }
-    if (path3[0] !== "/") {
-      path3 = `/${path3}`;
-    }
-    if (path3 === "/" && endsWithSlash) {
-      p = `${p}/`;
-    } else if (path3 !== "/") {
-      p = `${p}${path3}`;
-    }
-    if (path3 === "/" && p === "") {
-      p = "/";
-    }
+var mergePath = (base, sub, ...rest) => {
+  if (rest.length) {
+    sub = mergePath(sub, ...rest);
   }
-  return p;
+  return `${base?.[0] === "/" ? "" : "/"}${base}${sub === "/" ? "" : `${base?.at(-1) === "/" ? "" : "/"}${sub?.[0] === "/" ? sub.slice(1) : sub}`}`;
 };
 var checkOptionalParameter = (path3) => {
-  if (!path3.match(/\:.+\?$/)) {
+  if (path3.charCodeAt(path3.length - 1) !== 63 || !path3.includes(":")) {
     return null;
   }
   const segments = path3.split("/");
@@ -19851,7 +20033,7 @@ var HonoRequest = class {
   }
   header(name) {
     if (name) {
-      return this.raw.headers.get(name.toLowerCase()) ?? void 0;
+      return this.raw.headers.get(name) ?? void 0;
     }
     const headerData = {};
     this.raw.headers.forEach((value, key) => {
@@ -20173,7 +20355,10 @@ var Context = class {
       this.#preparedHeaders = {};
     }
     this.#preparedHeaders["content-type"] = TEXT_PLAIN;
-    return typeof arg === "number" ? this.#newResponse(text, arg, headers) : this.#newResponse(text, arg);
+    if (typeof arg === "number") {
+      return this.#newResponse(text, arg, headers);
+    }
+    return this.#newResponse(text, arg);
   };
   json = (object, arg, headers) => {
     const body = JSON.stringify(object);
@@ -20202,55 +20387,6 @@ var Context = class {
   };
 };
 
-// node_modules/hono/dist/compose.js
-var compose = (middleware, onError, onNotFound) => {
-  return (context, next) => {
-    let index = -1;
-    const isContext = context instanceof Context;
-    return dispatch(0);
-    async function dispatch(i) {
-      if (i <= index) {
-        throw new Error("next() called multiple times");
-      }
-      index = i;
-      let res;
-      let isError = false;
-      let handler2;
-      if (middleware[i]) {
-        handler2 = middleware[i][0][0];
-        if (isContext) {
-          context.req.routeIndex = i;
-        }
-      } else {
-        handler2 = i === middleware.length && next || void 0;
-      }
-      if (!handler2) {
-        if (isContext && context.finalized === false && onNotFound) {
-          res = await onNotFound(context);
-        }
-      } else {
-        try {
-          res = await handler2(context, () => {
-            return dispatch(i + 1);
-          });
-        } catch (err) {
-          if (err instanceof Error && isContext && onError) {
-            context.error = err;
-            res = await onError(err, context);
-            isError = true;
-          } else {
-            throw err;
-          }
-        }
-      }
-      if (res && (context.finalized === false || isError)) {
-        context.res = res;
-      }
-      return context;
-    }
-  };
-};
-
 // node_modules/hono/dist/router.js
 var METHOD_NAME_ALL = "ALL";
 var METHOD_NAME_ALL_LOWERCASE = "all";
@@ -20259,8 +20395,10 @@ var MESSAGE_MATCHER_IS_ALREADY_BUILT = "Can not add a route since the matcher is
 var UnsupportedPathError = class extends Error {
 };
 
+// node_modules/hono/dist/utils/constants.js
+var COMPOSED_HANDLER = "__COMPOSED_HANDLER";
+
 // node_modules/hono/dist/hono-base.js
-var COMPOSED_HANDLER = Symbol("composedHandler");
 var notFoundHandler = (c) => {
   return c.text("404 Not Found", 404);
 };
@@ -20324,10 +20462,9 @@ var Hono = class {
       });
       return this;
     };
-    const strict = options.strict ?? true;
-    delete options.strict;
-    Object.assign(this, options);
-    this.getPath = strict ? options.getPath ?? getPath : getPathNoStrict;
+    const { strict, ...optionsWithoutStrict } = options;
+    Object.assign(this, optionsWithoutStrict);
+    this.getPath = strict ?? true ? options.getPath ?? getPath : getPathNoStrict;
   }
   #clone() {
     const clone = new Hono({
@@ -20922,21 +21059,23 @@ var Node2 = class {
     const possibleKeys = [];
     for (let i = 0, len = parts.length; i < len; i++) {
       const p = parts[i];
-      if (Object.keys(curNode.#children).includes(p)) {
-        curNode = curNode.#children[p];
-        const pattern2 = getPattern(p);
+      const nextP = parts[i + 1];
+      const pattern = getPattern(p, nextP);
+      const key = Array.isArray(pattern) ? pattern[0] : p;
+      if (Object.keys(curNode.#children).includes(key)) {
+        curNode = curNode.#children[key];
+        const pattern2 = getPattern(p, nextP);
         if (pattern2) {
           possibleKeys.push(pattern2[1]);
         }
         continue;
       }
-      curNode.#children[p] = new Node2();
-      const pattern = getPattern(p);
+      curNode.#children[key] = new Node2();
       if (pattern) {
         curNode.#patterns.push(pattern);
         possibleKeys.push(pattern[1]);
       }
-      curNode = curNode.#children[p];
+      curNode = curNode.#children[key];
     }
     const m = /* @__PURE__ */ Object.create(null);
     const handlerSet = {
@@ -20975,6 +21114,7 @@ var Node2 = class {
     const curNode = this;
     let curNodes = [curNode];
     const parts = splitPath(path3);
+    const curNodesQueue = [];
     for (let i = 0, len = parts.length; i < len; i++) {
       const part = parts[i];
       const isLast = i === len - 1;
@@ -21002,6 +21142,7 @@ var Node2 = class {
             const astNode = node.#children["*"];
             if (astNode) {
               handlerSets.push(...this.#getHandlerSets(astNode, method, node.#params));
+              astNode.#params = params;
               tempNodes.push(astNode);
             }
             continue;
@@ -21012,10 +21153,19 @@ var Node2 = class {
           const [key, name, matcher] = pattern;
           const child = node.#children[key];
           const restPathString = parts.slice(i).join("/");
-          if (matcher instanceof RegExp && matcher.test(restPathString)) {
-            params[name] = restPathString;
-            handlerSets.push(...this.#getHandlerSets(child, method, node.#params, params));
-            continue;
+          if (matcher instanceof RegExp) {
+            const m = matcher.exec(restPathString);
+            if (m) {
+              params[name] = m[0];
+              handlerSets.push(...this.#getHandlerSets(child, method, node.#params, params));
+              if (Object.keys(child.#children).length) {
+                child.#params = params;
+                const componentCount = m[0].match(/\//)?.length ?? 0;
+                const targetCurNodes = curNodesQueue[componentCount] ||= [];
+                targetCurNodes.push(child);
+              }
+              continue;
+            }
           }
           if (matcher === true || matcher.test(part)) {
             params[name] = part;
@@ -21033,7 +21183,7 @@ var Node2 = class {
           }
         }
       }
-      curNodes = tempNodes;
+      curNodes = tempNodes.concat(curNodesQueue.shift() ?? []);
     }
     if (handlerSets.length > 1) {
       handlerSets.sort((a, b) => {
@@ -21132,7 +21282,16 @@ var newRequestFromIncoming = (method, url, incoming, abortController) => {
     return req;
   }
   if (!(method === "GET" || method === "HEAD")) {
-    init.body = import_stream.Readable.toWeb(incoming);
+    if ("rawBody" in incoming && incoming.rawBody instanceof Buffer) {
+      init.body = new ReadableStream({
+        start(controller) {
+          controller.enqueue(incoming.rawBody);
+          controller.close();
+        }
+      });
+    } else {
+      init.body = import_stream.Readable.toWeb(incoming);
+    }
   }
   return new Request2(url, init);
 };
@@ -21195,13 +21354,34 @@ Object.setPrototypeOf(requestPrototype, Request2.prototype);
 var newRequest = (incoming, defaultHostname) => {
   const req = Object.create(requestPrototype);
   req[incomingKey] = incoming;
+  const incomingUrl = incoming.url || "";
+  if (incomingUrl[0] !== "/" && // short-circuit for performance. most requests are relative URL.
+  (incomingUrl.startsWith("http://") || incomingUrl.startsWith("https://"))) {
+    if (incoming instanceof import_http2.Http2ServerRequest) {
+      throw new RequestError("Absolute URL for :path is not allowed in HTTP/2");
+    }
+    try {
+      const url2 = new URL(incomingUrl);
+      req[urlKey] = url2.href;
+    } catch (e) {
+      throw new RequestError("Invalid absolute URL", { cause: e });
+    }
+    return req;
+  }
   const host = (incoming instanceof import_http2.Http2ServerRequest ? incoming.authority : incoming.headers.host) || defaultHostname;
   if (!host) {
     throw new RequestError("Missing host header");
   }
-  const url = new URL(
-    `${incoming instanceof import_http2.Http2ServerRequest || incoming.socket && incoming.socket.encrypted ? "https" : "http"}://${host}${incoming.url}`
-  );
+  let scheme;
+  if (incoming instanceof import_http2.Http2ServerRequest) {
+    scheme = incoming.scheme;
+    if (!(scheme === "http" || scheme === "https")) {
+      throw new RequestError("Unsupported scheme");
+    }
+  } else {
+    scheme = incoming.socket && incoming.socket.encrypted ? "https" : "http";
+  }
+  const url = new URL(`${scheme}://${host}${incomingUrl}`);
   if (url.hostname.length !== host.length && url.hostname !== host.replace(/:\d+$/, "")) {
     throw new RequestError("Invalid host header");
   }
@@ -21469,10 +21649,14 @@ var getRequestListener = (fetchCallback, options = {}) => {
     try {
       req = newRequest(incoming, options.hostname);
       outgoing.on("close", () => {
+        const abortController = req[abortControllerKey];
+        if (!abortController) {
+          return;
+        }
         if (incoming.errored) {
-          req[getAbortController]().abort(incoming.errored.toString());
+          req[abortControllerKey].abort(incoming.errored.toString());
         } else if (!outgoing.writableFinished) {
-          req[getAbortController]().abort("Client connection prematurely closed.");
+          req[abortControllerKey].abort("Client connection prematurely closed.");
         }
       });
       res = fetchCallback(req, { incoming, outgoing });
@@ -21521,7 +21705,7 @@ var serve = (options, listeningListener) => {
   return server;
 };
 
-// node_modules/ws/wrapper.mjs
+// node_modules/@hono/node-ws/node_modules/ws/wrapper.mjs
 var import_stream2 = __toESM(require_stream(), 1);
 var import_receiver = __toESM(require_receiver(), 1);
 var import_sender = __toESM(require_sender(), 1);
@@ -21547,17 +21731,17 @@ var CloseEvent = globalThis.CloseEvent ?? class extends Event {
 };
 var createNodeWebSocket = (init) => {
   const wss = new import_websocket_server.default({ noServer: true });
-  const waiter = /* @__PURE__ */ new Map();
+  const waiterMap = /* @__PURE__ */ new Map();
   wss.on("connection", (ws, request) => {
-    const waiterFn = waiter.get(request);
-    if (waiterFn) {
-      waiterFn(ws);
-      waiter.delete(request);
+    const waiter = waiterMap.get(request);
+    if (waiter) {
+      waiter.resolve(ws);
+      waiterMap.delete(request);
     }
   });
-  const nodeUpgradeWebSocket = (request) => {
+  const nodeUpgradeWebSocket = (request, response) => {
     return new Promise((resolve) => {
-      waiter.set(request, resolve);
+      waiterMap.set(request, { resolve, response });
     });
   };
   return {
@@ -21572,11 +21756,19 @@ var createNodeWebSocket = (init) => {
           }
           headers.append(key, Array.isArray(value) ? value[0] : value);
         }
-        await init.app.request(
+        const response = await init.app.request(
           url,
           { headers },
           { incoming: request, outgoing: void 0 }
         );
+        const waiter = waiterMap.get(request);
+        if (!waiter || waiter.response !== response) {
+          socket.end(
+            "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n"
+          );
+          waiterMap.delete(request);
+          return;
+        }
         wss.handleUpgrade(request, socket, head, (ws) => {
           wss.emit("connection", ws, request);
         });
@@ -21587,10 +21779,10 @@ var createNodeWebSocket = (init) => {
         await next();
         return;
       }
-      ;
+      const response = new Response();
       (async () => {
+        const ws = await nodeUpgradeWebSocket(c.env.incoming, response);
         const events = await createEvents(c);
-        const ws = await nodeUpgradeWebSocket(c.env.incoming);
         const ctx = {
           binaryType: "arraybuffer",
           close(code, reason) {
@@ -21632,7 +21824,7 @@ var createNodeWebSocket = (init) => {
           );
         });
       })();
-      return new Response();
+      return response;
     }
   };
 };
@@ -22359,7 +22551,7 @@ var chalkStderr = createChalk({ level: stderrColor ? stderrColor.level : 0 });
 var source_default = chalk;
 
 // src/lib/globals/logger.ts
-var logDir = import_path.default.join(import_path.default.dirname(process.cwd()), "logs");
+var logDir = import_path.default.join(process.cwd(), "logs");
 if (!import_fs2.default.existsSync(logDir)) {
   import_fs2.default.mkdirSync(logDir, { recursive: true });
 }
@@ -26257,16 +26449,32 @@ ZodReadonly.create = (type, params) => {
     ...processCreateParams(params)
   });
 };
-function custom(check, params = {}, fatal) {
+function cleanParams(params, data) {
+  const p = typeof params === "function" ? params(data) : typeof params === "string" ? { message: params } : params;
+  const p2 = typeof p === "string" ? { message: p } : p;
+  return p2;
+}
+function custom(check, _params = {}, fatal) {
   if (check)
     return ZodAny.create().superRefine((data, ctx) => {
       var _a, _b;
-      if (!check(data)) {
-        const p = typeof params === "function" ? params(data) : typeof params === "string" ? { message: params } : params;
-        const _fatal = (_b = (_a = p.fatal) !== null && _a !== void 0 ? _a : fatal) !== null && _b !== void 0 ? _b : true;
-        const p2 = typeof p === "string" ? { message: p } : p;
-        ctx.addIssue({ code: "custom", ...p2, fatal: _fatal });
+      const r = check(data);
+      if (r instanceof Promise) {
+        return r.then((r2) => {
+          var _a2, _b2;
+          if (!r2) {
+            const params = cleanParams(_params, data);
+            const _fatal = (_b2 = (_a2 = params.fatal) !== null && _a2 !== void 0 ? _a2 : fatal) !== null && _b2 !== void 0 ? _b2 : true;
+            ctx.addIssue({ code: "custom", ...params, fatal: _fatal });
+          }
+        });
       }
+      if (!r) {
+        const params = cleanParams(_params, data);
+        const _fatal = (_b = (_a = params.fatal) !== null && _a !== void 0 ? _a : fatal) !== null && _b !== void 0 ? _b : true;
+        ctx.addIssue({ code: "custom", ...params, fatal: _fatal });
+      }
+      return;
     });
   return ZodAny.create();
 }
@@ -28761,9 +28969,11 @@ function parseRowValues(row, columns) {
     length: columns.size
   });
   let hasUndefinedOrComplexColumns = false;
+  let indexedRowColumns = rowColumns.length;
   for (const col of rowColumns) {
     const columnIdx = columns.get(col);
     if (isUndefined(columnIdx)) {
+      indexedRowColumns--;
       continue;
     }
     const value = row[col];
@@ -28772,7 +28982,7 @@ function parseRowValues(row, columns) {
     }
     rowValues[columnIdx] = value;
   }
-  const hasMissingColumns = rowColumns.length < columns.size;
+  const hasMissingColumns = indexedRowColumns < columns.size;
   if (hasMissingColumns || hasUndefinedOrComplexColumns) {
     const defaultValue = DefaultInsertValueNode.create();
     return ValueListNode.create(rowValues.map((it) => isUndefined(it) ? defaultValue : parseValueExpression(it)));
@@ -32616,6 +32826,10 @@ var ROOT_OPERATION_NODES = freeze({
   UpdateQueryNode: true,
   MergeQueryNode: true
 });
+var SCHEMALESS_FUNCTIONS = {
+  json_agg: true,
+  to_json: true
+};
 var WithSchemaTransformer = class extends OperationNodeTransformer {
   #schema;
   #schemableIds = /* @__PURE__ */ new Set();
@@ -32664,6 +32878,24 @@ var WithSchemaTransformer = class extends OperationNodeTransformer {
       ...transformed,
       table: TableNode.createWithSchema(this.#schema, transformed.table.table.identifier.name)
     };
+  }
+  transformAggregateFunction(node) {
+    return {
+      ...super.transformAggregateFunction({ ...node, aggregated: [] }),
+      aggregated: this.#transformTableArgsWithoutSchemas(node, "aggregated")
+    };
+  }
+  transformFunction(node) {
+    return {
+      ...super.transformFunction({ ...node, arguments: [] }),
+      arguments: this.#transformTableArgsWithoutSchemas(node, "arguments")
+    };
+  }
+  #transformTableArgsWithoutSchemas(node, argsKey) {
+    return SCHEMALESS_FUNCTIONS[node.func] ? node[argsKey].map((arg) => !TableNode.is(arg) || arg.table.schema ? this.transformNode(arg) : {
+      ...arg,
+      table: this.transformIdentifier(arg.table.identifier)
+    }) : this.transformNodeList(node[argsKey]);
   }
   #isRootOperationNode(node) {
     return node.kind in ROOT_OPERATION_NODES;
@@ -39312,10 +39544,10 @@ var DefaultQueryCompiler = class extends OperationNodeVisitor {
     this.append(")");
   }
   compileList(nodes, separator = ", ") {
-    const lastIndex = nodes.length - 1;
-    for (let i = 0; i <= lastIndex; i++) {
+    const lastIndex2 = nodes.length - 1;
+    for (let i = 0; i <= lastIndex2; i++) {
       this.visitNode(nodes[i]);
-      if (i < lastIndex) {
+      if (i < lastIndex2) {
         this.append(separator);
       }
     }
@@ -40757,7 +40989,7 @@ function createSnakeCaseMapper({ upperCase = false, underscoreBeforeDigits = fal
       const prevUpperChar = upper[i - 1];
       const lowerChar = lower[i];
       const prevLowerChar = lower[i - 1];
-      if (underscoreBeforeDigits && isDigit(char) && !isDigit(prevChar)) {
+      if (underscoreBeforeDigits && isDigit(char) && !isDigit(prevChar) && !out.endsWith("_")) {
         out += "_" + char;
         continue;
       }
@@ -41014,10 +41246,17 @@ function generateBaseModel(table, primaryKey, updatedAtField) {
      * Finds multiple records based on the provided expression builder and limit.
      */
     static async findMany(options = {}, trx) {
-      const records = await (trx ?? db).selectFrom(this.tableName).$if(!!options.eb, (qb) => qb.where(options.eb)).$if(!!options.limit, (qb) => qb.limit(options.limit)).selectAll().execute();
+      const records = await (trx ?? db).selectFrom(this.tableName).$if(!!options.eb, (qb) => qb.where(options.eb)).$if(!!options.limit, (qb) => qb.limit(options.limit)).$if(!!options.offset, (qb) => qb.offset(options.offset)).selectAll().execute();
       return records.map(
         (record) => new this(record)
       );
+    }
+    /**
+     * Counts records based on the provided expression builder.
+     */
+    static async count(options = {}, trx) {
+      const result = await (trx ?? db).selectFrom(this.tableName).$if(!!options.eb, (qb) => qb.where(options.eb)).select((eb) => eb.fn.countAll().as("count")).executeTakeFirst();
+      return Number(result?.count ?? 0);
     }
     /**
      * Finds one record based on the provided options or throws an HTTPException if not found.
@@ -41828,16 +42067,29 @@ var StreamingApi = class {
   }
 };
 
+// node_modules/hono/dist/helper/streaming/utils.js
+var isOldBunVersion = () => {
+  const version = typeof Bun !== "undefined" ? Bun.version : void 0;
+  if (version === void 0) {
+    return false;
+  }
+  const result = version.startsWith("1.1") || version.startsWith("1.0") || version.startsWith("0.");
+  isOldBunVersion = () => result;
+  return result;
+};
+
 // node_modules/hono/dist/helper/streaming/stream.js
 var contextStash = /* @__PURE__ */ new WeakMap();
 var stream = (c, cb, onError) => {
   const { readable, writable } = new TransformStream();
   const stream2 = new StreamingApi(writable, readable);
-  c.req.raw.signal.addEventListener("abort", () => {
-    if (!stream2.closed) {
-      stream2.abort();
-    }
-  });
+  if (isOldBunVersion()) {
+    c.req.raw.signal.addEventListener("abort", () => {
+      if (!stream2.closed) {
+        stream2.abort();
+      }
+    });
+  }
   contextStash.set(stream2.responseReadable, c);
   (async () => {
     try {
@@ -42150,10 +42402,26 @@ var log = new Hono2().get(
   }
 );
 
+// src/lib/helpers/apiResponse.ts
+function successResponse(c, data, message = "Success", totalCount, statusCode = 200) {
+  const response = {
+    message,
+    data
+  };
+  if (totalCount !== void 0) {
+    response.total_count = totalCount;
+  }
+  return c.json(response, statusCode);
+}
+
 // src/routes/setting/index.ts
 var setting = new Hono2().get("/", async (c) => {
   const settings = await Setting.findOneOrThrow();
-  return c.json(settings.serialize());
+  return successResponse(
+    c,
+    settings.serialize(),
+    "Settings retrieved successfully"
+  );
 }).patch(
   "/",
   zValidator(
@@ -42180,26 +42448,49 @@ var setting = new Hono2().get("/", async (c) => {
       clockAlignedDataInterval
     });
     await Setting.applyCurrentViaChangeConfiguration();
-    return c.json(settings.serialize());
+    return successResponse(
+      c,
+      settings.serialize(),
+      "Settings updated successfully"
+    );
   }
 );
 
 // src/routes/charger/index.ts
-var charger = new Hono2().get("/", async (c) => {
-  const settings = await Setting.findOneOrThrow();
-  const heartbeatIntervalWithBuffer = settings.heartbeatInterval + 10;
-  const chargers = await Charger.findMany();
-  const chargersWithConnectivity = chargers.map((charger2) => {
-    const lastHeartbeatTime = charger2.lastHeartbeat ? new Date(charger2.lastHeartbeat).getTime() : 0;
-    const now = Date.now();
-    const connectivity = lastHeartbeatTime > 0 && now - lastHeartbeatTime <= heartbeatIntervalWithBuffer * 1e3 ? "Online" : "Offline";
-    return {
-      ...charger2.serialize(),
-      connectivity
-    };
-  });
-  return c.json(chargersWithConnectivity);
-}).patch(
+var charger = new Hono2().get(
+  "/",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const settings = await Setting.findOneOrThrow();
+    const heartbeatIntervalWithBuffer = settings.heartbeatInterval + 10;
+    const [chargers, totalCount] = await Promise.all([
+      Charger.findMany({ limit, offset }),
+      Charger.count()
+    ]);
+    const chargersWithConnectivity = chargers.map((charger2) => {
+      const lastHeartbeatTime = charger2.lastHeartbeat ? new Date(charger2.lastHeartbeat).getTime() : 0;
+      const now = Date.now();
+      const connectivity = lastHeartbeatTime > 0 && now - lastHeartbeatTime <= heartbeatIntervalWithBuffer * 1e3 ? "Online" : "Offline";
+      return {
+        ...charger2.serialize(),
+        connectivity
+      };
+    });
+    return successResponse(
+      c,
+      chargersWithConnectivity,
+      "Chargers retrieved successfully",
+      totalCount
+    );
+  }
+).patch(
   "/:id",
   zValidator(
     "param",
@@ -42234,7 +42525,11 @@ var charger = new Hono2().get("/", async (c) => {
       friendlyName,
       shortcode
     });
-    return c.json(charger2.serialize());
+    return successResponse(
+      c,
+      charger2.serialize(),
+      "Charger updated successfully"
+    );
   }
 ).delete(
   "/:id",
@@ -42255,7 +42550,11 @@ var charger = new Hono2().get("/", async (c) => {
       });
     }
     await existingCharger.delete();
-    return c.json(existingCharger.serialize());
+    return successResponse(
+      c,
+      existingCharger.serialize(),
+      "Charger deleted successfully"
+    );
   }
 ).post(
   "/",
@@ -42281,7 +42580,13 @@ var charger = new Hono2().get("/", async (c) => {
       shortcode,
       status: "Accepted"
     });
-    return c.json(newCharger.serialize(), 201);
+    return successResponse(
+      c,
+      newCharger.serialize(),
+      "Charger created successfully",
+      void 0,
+      201
+    );
   }
 ).post(
   "/:id/reset",
@@ -42304,24 +42609,64 @@ var charger = new Hono2().get("/", async (c) => {
       eb: (eb) => eb("id", "=", id)
     });
     const data = await charger2.reset(type);
-    return c.json({
-      success: data[2].status === "Accepted"
-    });
+    return successResponse(
+      c,
+      {
+        success: data[2].status === "Accepted"
+      },
+      "Reset command sent successfully"
+    );
   }
 );
 
 // src/routes/chargeAuthorization/index.ts
-var chargeAuthorization = new Hono2().get("/", async (c) => {
-  const authorizations = await ChargeAuthorization.findMany();
-  return c.json(authorizations.map((auth) => auth.serialize()));
-}).get("/detail", async (c) => {
-  const authorizations = await ChargeAuthorization.findMany();
-  return c.json(
-    await Promise.all(
-      authorizations.map((authorization) => authorization.getFullDetail())
-    )
-  );
-}).post(
+var chargeAuthorization = new Hono2().get(
+  "/",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const [authorizations, totalCount] = await Promise.all([
+      ChargeAuthorization.findMany({ limit, offset }),
+      ChargeAuthorization.count()
+    ]);
+    return successResponse(
+      c,
+      authorizations.map((auth) => auth.serialize()),
+      "Authorizations retrieved successfully",
+      totalCount
+    );
+  }
+).get(
+  "/detail",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const [authorizations, totalCount] = await Promise.all([
+      ChargeAuthorization.findMany({ limit, offset }),
+      ChargeAuthorization.count()
+    ]);
+    return successResponse(
+      c,
+      await Promise.all(
+        authorizations.map((authorization) => authorization.getFullDetail())
+      ),
+      "Authorization details retrieved successfully",
+      totalCount
+    );
+  }
+).post(
   "/",
   zValidator(
     "json",
@@ -42338,7 +42683,13 @@ var chargeAuthorization = new Hono2().get("/", async (c) => {
       expiryDate,
       rfidTagId: rfidTagId || null
     });
-    return c.json(newAuthorization.serialize(), 201);
+    return successResponse(
+      c,
+      newAuthorization.serialize(),
+      "Authorization created successfully",
+      void 0,
+      201
+    );
   }
 ).patch(
   "/:id",
@@ -42367,7 +42718,11 @@ var chargeAuthorization = new Hono2().get("/", async (c) => {
       expiryDate,
       rfidTagId
     });
-    return c.json(authorization.serialize());
+    return successResponse(
+      c,
+      authorization.serialize(),
+      "Authorization updated successfully"
+    );
   }
 ).delete(
   "/:id",
@@ -42383,22 +42738,62 @@ var chargeAuthorization = new Hono2().get("/", async (c) => {
       eb: (eb) => eb("id", "=", id)
     });
     await authorization.delete();
-    return c.json(authorization.serialize());
+    return successResponse(
+      c,
+      authorization.serialize(),
+      "Authorization deleted successfully"
+    );
   }
 );
 
 // src/routes/connector/index.ts
-var connector = new Hono2().get("/", async (c) => {
-  const connectors = await Connector.findMany();
-  return c.json(connectors.map((connector2) => connector2.serialize()));
-}).get("/detail", async (c) => {
-  const connectors = await Connector.findMany();
-  return c.json(
-    await Promise.all(
-      connectors.map((connector2) => connector2.getDetailData())
-    )
-  );
-}).post(
+var connector = new Hono2().get(
+  "/",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const [connectors, totalCount] = await Promise.all([
+      Connector.findMany({ limit, offset }),
+      Connector.count()
+    ]);
+    return successResponse(
+      c,
+      connectors.map((connector2) => connector2.serialize()),
+      "Connectors retrieved successfully",
+      totalCount
+    );
+  }
+).get(
+  "/detail",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const [connectors, totalCount] = await Promise.all([
+      Connector.findMany({ limit, offset }),
+      Connector.count()
+    ]);
+    return successResponse(
+      c,
+      await Promise.all(
+        connectors.map((connector2) => connector2.getDetailData())
+      ),
+      "Connector details retrieved successfully",
+      totalCount
+    );
+  }
+).post(
   "/:id/unlock-connector",
   zValidator(
     "param",
@@ -42412,9 +42807,13 @@ var connector = new Hono2().get("/", async (c) => {
       eb: (eb) => eb("connector.id", "=", id)
     });
     const data = await connector2.unlock();
-    return c.json({
-      success: data[2].status === "Unlocked"
-    });
+    return successResponse(
+      c,
+      {
+        success: data[2].status === "Unlocked"
+      },
+      "Unlock command sent successfully"
+    );
   }
 ).get(
   "/charger/:id",
@@ -42429,7 +42828,11 @@ var connector = new Hono2().get("/", async (c) => {
     const connectors = await Connector.findMany({
       eb: (eb) => eb("chargerId", "=", id)
     });
-    return c.json(connectors.map((connector2) => connector2.serialize()));
+    return successResponse(
+      c,
+      connectors.map((connector2) => connector2.serialize()),
+      "Charger connectors retrieved successfully"
+    );
   }
 ).get(
   "/charger/:id/detail",
@@ -42444,22 +42847,62 @@ var connector = new Hono2().get("/", async (c) => {
     const connectors = await Connector.findMany({
       eb: (eb) => eb("chargerId", "=", id)
     });
-    return c.json(
+    return successResponse(
+      c,
       await Promise.all(
         connectors.map((connector2) => connector2.getDetailData())
-      )
+      ),
+      "Charger connector details retrieved successfully"
     );
   }
 );
 
 // src/routes/rfid-tag/+index.ts
-var rfidTag = new Hono2().get("/", async (c) => {
-  const tags = await RfidTag.findMany();
-  return c.json(tags.map((tag) => tag.serialize()));
-}).get("/detail", async (c) => {
-  const tags = await RfidTag.findMany();
-  return c.json(await Promise.all(tags.map((tag) => tag.getFullDetail())));
-}).post(
+var rfidTag = new Hono2().get(
+  "/",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const [tags, totalCount] = await Promise.all([
+      RfidTag.findMany({ limit, offset }),
+      RfidTag.count()
+    ]);
+    return successResponse(
+      c,
+      tags.map((tag) => tag.serialize()),
+      "RFID tags retrieved successfully",
+      totalCount
+    );
+  }
+).get(
+  "/detail",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const [tags, totalCount] = await Promise.all([
+      RfidTag.findMany({ limit, offset }),
+      RfidTag.count()
+    ]);
+    return successResponse(
+      c,
+      await Promise.all(tags.map((tag) => tag.getFullDetail())),
+      "RFID tag details retrieved successfully",
+      totalCount
+    );
+  }
+).post(
   "/",
   zValidator(
     "json",
@@ -42474,7 +42917,13 @@ var rfidTag = new Hono2().get("/", async (c) => {
       friendlyName,
       rfidTag: rfidTag2
     });
-    return c.json(newTag);
+    return successResponse(
+      c,
+      newTag.serialize(),
+      "RFID tag created successfully",
+      void 0,
+      201
+    );
   }
 ).patch(
   "/:id",
@@ -42488,7 +42937,7 @@ var rfidTag = new Hono2().get("/", async (c) => {
     "json",
     z.object({
       friendlyName: z.string(),
-      rfidTag: z.ostring()
+      rfidTag: z.string()
     })
   ),
   async (c) => {
@@ -42501,7 +42950,11 @@ var rfidTag = new Hono2().get("/", async (c) => {
       friendlyName,
       rfidTag: rfidTag2
     });
-    return c.json(tag.serialize());
+    return successResponse(
+      c,
+      tag.serialize(),
+      "RFID tag updated successfully"
+    );
   }
 ).delete(
   "/:id",
@@ -42517,24 +42970,62 @@ var rfidTag = new Hono2().get("/", async (c) => {
       eb: (eb) => eb("id", "=", id)
     });
     await tag.delete();
-    return c.json(tag.serialize());
+    return successResponse(
+      c,
+      tag.serialize(),
+      "RFID tag deleted successfully"
+    );
   }
 );
 
 // src/routes/transaction/index.ts
-var transaction = new Hono2().get("/", async (c) => {
-  const transactions = await Transaction2.findMany();
-  return c.json(
-    transactions.reverse().map((transaction2) => transaction2.serialize())
-  );
-}).get("/detail", async (c) => {
-  const transactions = await Transaction2.findMany();
-  return c.json(
-    await Promise.all(
-      transactions.reverse().map((transaction2) => transaction2.getFullDetail())
-    )
-  );
-}).get(
+var transaction = new Hono2().get(
+  "/",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const [transactions, totalCount] = await Promise.all([
+      Transaction2.findMany({ limit, offset }),
+      Transaction2.count()
+    ]);
+    return successResponse(
+      c,
+      transactions.reverse().map((transaction2) => transaction2.serialize()),
+      "Transactions retrieved successfully",
+      totalCount
+    );
+  }
+).get(
+  "/detail",
+  zValidator(
+    "query",
+    z.object({
+      limit: z.coerce.number().optional(),
+      offset: z.coerce.number().optional()
+    })
+  ),
+  async (c) => {
+    const { limit, offset } = c.req.valid("query");
+    const [transactions, totalCount] = await Promise.all([
+      Transaction2.findMany({ limit, offset }),
+      Transaction2.count()
+    ]);
+    return successResponse(
+      c,
+      await Promise.all(
+        transactions.reverse().map((transaction2) => transaction2.getFullDetail())
+      ),
+      "Transaction details retrieved successfully",
+      totalCount
+    );
+  }
+).get(
   "/:id",
   zValidator(
     "param",
@@ -42547,7 +43038,11 @@ var transaction = new Hono2().get("/", async (c) => {
     const transaction2 = await Transaction2.findOneOrThrow({
       eb: (eb) => eb("id", "=", id)
     });
-    return c.json(transaction2.serialize());
+    return successResponse(
+      c,
+      transaction2.serialize(),
+      "Transaction retrieved successfully"
+    );
   }
 ).get(
   "/:id/detail",
@@ -42562,7 +43057,11 @@ var transaction = new Hono2().get("/", async (c) => {
     const transaction2 = await Transaction2.findOneOrThrow({
       eb: (eb) => eb("id", "=", id)
     });
-    return c.json(await transaction2.getFullDetail());
+    return successResponse(
+      c,
+      await transaction2.getFullDetail(),
+      "Transaction details retrieved successfully"
+    );
   }
 ).get(
   "/charger/:chargerId/detail",
@@ -42587,10 +43086,12 @@ var transaction = new Hono2().get("/", async (c) => {
         )
       });
     }
-    return c.json(
+    return successResponse(
+      c,
       await Promise.all(
         transactions.map((transaction2) => transaction2.getFullDetail())
-      )
+      ),
+      "Charger transactions retrieved successfully"
     );
   }
 ).get(
@@ -42606,10 +43107,12 @@ var transaction = new Hono2().get("/", async (c) => {
     const transactions = await Transaction2.findMany({
       eb: (eb) => eb("connectorId", "=", connectorId)
     });
-    return c.json(
+    return successResponse(
+      c,
       await Promise.all(
         transactions.map((transaction2) => transaction2.getFullDetail())
-      )
+      ),
+      "Connector transactions retrieved successfully"
     );
   }
 ).delete(
@@ -42626,7 +43129,11 @@ var transaction = new Hono2().get("/", async (c) => {
       eb: (eb) => eb("id", "=", id)
     });
     await transaction2.delete();
-    return c.json(transaction2.serialize());
+    return successResponse(
+      c,
+      transaction2.serialize(),
+      "Transaction deleted successfully"
+    );
   }
 );
 

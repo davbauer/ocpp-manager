@@ -26,7 +26,7 @@ export const createQueryRfidTagDetail = (refetchInterval?: number) =>
 	createQuery({
 		refetchInterval,
 		queryKey: queryKeys.rfidTagDetail,
-		queryFn: () => hClient['rfid-tag'].detail.$get().then((x) => x.json())
+		queryFn: () => hClient['rfid-tag'].detail.$get({query: {}}).then((x) => x.json())
 	});
 
 export const createMutationRfidTagDelete = () =>
@@ -89,7 +89,7 @@ export const createMutationRfidTagUpdate = () =>
 		}: {
 			id: number;
 			friendlyName: string;
-			rfidTag?: string;
+			rfidTag: string;
 		}) =>
 			toast.promise(
 				hClient['rfid-tag'][':id']
@@ -118,21 +118,22 @@ export const createQueryCharger = (refetchInterval?: number) =>
 	createQuery({
 		refetchInterval,
 		queryKey: queryKeys.charger,
-		queryFn: () => hClient.charger.$get().then((x) => x.json())
+		queryFn: () => hClient.charger.$get({ query: {} }).then((x) => x.json())
 	});
 
 export const createQueryConnector = (chargerId: string, refetchInterval?: number) =>
 	createQuery({
 		refetchInterval,
 		queryKey: queryKeys.connectorByidDetail(chargerId),
-		queryFn: () =>
-			hClient.connector.charger[':id'].detail
+		queryFn: async () => {
+			const response = await hClient.connector.charger[':id'].detail
 				.$get({
 					param: {
 						id: chargerId
 					}
-				})
-				.then((x) => x.json())
+				});
+			return response.json() as Promise<any>;
+		}
 	});
 
 export const createMutationConnectorUnlock = () =>
@@ -303,7 +304,7 @@ export const createQueryChargeAuthorizationDetail = (refetchInterval?: number) =
 	createQuery({
 		refetchInterval,
 		queryKey: queryKeys.chargeAuthorizationDetail,
-		queryFn: () => hClient['charge-authorization'].detail.$get().then((x) => x.json())
+		queryFn: () => hClient['charge-authorization'].detail.$get({query: {}}).then((x) => x.json())
 	});
 
 export const createMutationChargeAuthorizationCreate = () =>
@@ -406,7 +407,7 @@ export const createQueryTransactionsDetail = (refetchInterval?: number) =>
 	createQuery({
 		refetchInterval,
 		queryKey: queryKeys.transactionDetail,
-		queryFn: () => hClient.transaction.detail.$get().then((x) => x.json())
+		queryFn: () => hClient.transaction.detail.$get({query: {}}).then((x) => x.json())
 	});
 
 export const createQueryTransactionByIdDetail = (id: number, refetchInterval?: number) =>

@@ -30,8 +30,8 @@
 					label: 'Charger ID',
 					name: 'chargerId',
 					type: 'dropdown',
-					options: $queryChargers.data
-						? $queryChargers.data.map((charger) => ({
+					options: $queryChargers.data?.data
+						? $queryChargers.data.data.map((charger) => ({
 								label: `${charger.friendlyName} (${charger.vendor})`,
 								value: charger.id.toString()
 							}))
@@ -50,8 +50,8 @@
 					label: 'RFID Tag ID',
 					name: 'rfidTagId',
 					type: 'dropdown',
-					options: $queryRfidTags.data
-						? $queryRfidTags.data.map((tag) => ({
+					options: $queryRfidTags.data?.data
+						? $queryRfidTags.data.data.map((tag) => ({
 								label: `${tag.friendlyName} (${tag.rfidTag})`,
 								value: tag.id.toString()
 							}))
@@ -85,7 +85,7 @@
 		});
 	};
 
-	const openEditDrawer = (auth: NonNullable<typeof $queryChargeAuthorizations.data>[0]) => {
+	const openEditDrawer = (auth: NonNullable<typeof $queryChargeAuthorizations.data>['data'][0]) => {
 		drawerStore.open({
 			header: 'Edit Charge Authorization',
 			fields: [
@@ -94,8 +94,8 @@
 					name: 'chargerId',
 					type: 'dropdown',
 					defaultValue: auth.chargerId.toString(),
-					options: $queryChargers.data
-						? $queryChargers.data.map((charger) => ({
+					options: $queryChargers.data?.data
+						? $queryChargers.data.data.map((charger) => ({
 								label: `${charger.friendlyName} (${charger.vendor})`,
 								value: charger.id.toString()
 							}))
@@ -115,8 +115,8 @@
 					name: 'rfidTagId',
 					type: 'dropdown',
 					defaultValue: auth.rfidTagId?.toString() || '',
-					options: $queryRfidTags.data
-						? $queryRfidTags.data.map((tag) => ({
+					options: $queryRfidTags.data?.data
+						? $queryRfidTags.data.data.map((tag) => ({
 								label: `${tag.friendlyName} (${tag.rfidTag})`,
 								value: tag.id.toString()
 							}))
@@ -189,8 +189,8 @@
 
 		<Scrollable class="p-4" maxHeight="80svh">
 			<div class="space-y-6">
-				{#if $queryChargeAuthorizations.data}
-					{#each $queryChargeAuthorizations.data as auth}
+				{#if $queryChargeAuthorizations.data?.data}
+					{#each $queryChargeAuthorizations.data.data as auth}
 						<div class="bg-base-200 rounded-lg p-6 shadow-md">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-4">

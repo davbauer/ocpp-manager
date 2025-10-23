@@ -61,7 +61,7 @@
 		});
 	};
 
-	const openEditDrawer = (tag: NonNullable<typeof $queryRfidTags.data>[0]) => {
+	const openEditDrawer = (tag: NonNullable<typeof $queryRfidTags.data>['data'][0]) => {
 		drawerStore.open({
 			header: 'Edit RFID Tag',
 			fields: [
@@ -136,8 +136,8 @@
 
 		<Scrollable class="p-4" maxHeight="80svh">
 			<div class="space-y-6">
-				{#if $queryRfidTags.data && $queryRfidTags.data.length > 0}
-					{#each $queryRfidTags.data as tag}
+				{#if $queryRfidTags.data?.data && $queryRfidTags.data.data.length > 0}
+					{#each $queryRfidTags.data.data as tag}
 						<div class="bg-base-200 rounded-lg p-6 shadow-md">
 							<div class="mb-6 flex items-center justify-between">
 								<div class="flex items-center gap-4">

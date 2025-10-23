@@ -10,10 +10,10 @@
 	let clockAlignedDataInterval = $state(0);
 
 	$effect(() => {
-		if ($querySettings.data) {
-			heartbeatInterval = $querySettings.data.heartbeatInterval;
-			meterValueSampleInterval = $querySettings.data.meterValueSampleInterval;
-			clockAlignedDataInterval = $querySettings.data.clockAlignedDataInterval;
+		if ($querySettings.data?.data) {
+			heartbeatInterval = $querySettings.data.data.heartbeatInterval;
+			meterValueSampleInterval = $querySettings.data.data.meterValueSampleInterval;
+			clockAlignedDataInterval = $querySettings.data.data.clockAlignedDataInterval;
 		}
 	});
 

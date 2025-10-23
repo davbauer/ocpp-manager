@@ -23,8 +23,8 @@
 	<div class="container mx-auto px-4">
 		<Scrollable class="p-4" maxHeight="80svh">
 			<div class="space-y-6">
-				{#if $queryTransactions.data && $queryTransactions.data.length > 0}
-					{#each $queryTransactions.data as transaction}
+				{#if $queryTransactions.data?.data && $queryTransactions.data.data.length > 0}
+					{#each $queryTransactions.data.data as transaction}
 						<div class="bg-base-200 rounded-lg p-6 shadow-md">
 							<div class="mb-4 flex items-center justify-between">
 								<div>
