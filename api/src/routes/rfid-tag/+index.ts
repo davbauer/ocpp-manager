@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { RfidTag } from "../../lib/models/RfidTag";
+import { successResponse } from "../../lib/helpers/apiResponse";
 
 export const rfidTag = new Hono()
   .get(
@@ -15,11 +16,18 @@ export const rfidTag = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      const tags = await RfidTag.findMany({
-        limit,
-        offset,
-      });
-      return c.json(tags.map((tag) => tag.serialize()));
+      
+      const [tags, totalCount] = await Promise.all([
+        RfidTag.findMany({ limit, offset }),
+        RfidTag.count(),
+      ]);
+      
+      return successResponse(
+        c,
+        tags.map((tag) => tag.serialize()),
+        "RFID tags retrieved successfully",
+        totalCount
+      );
     }
   )
   .get(
@@ -33,12 +41,18 @@ export const rfidTag = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      const tags = await RfidTag.findMany({
-        limit,
-        offset,
-      });
+      
+      const [tags, totalCount] = await Promise.all([
+        RfidTag.findMany({ limit, offset }),
+        RfidTag.count(),
+      ]);
 
-      return c.json(await Promise.all(tags.map((tag) => tag.getFullDetail())));
+      return successResponse(
+        c,
+        await Promise.all(tags.map((tag) => tag.getFullDetail())),
+        "RFID tag details retrieved successfully",
+        totalCount
+      );
     }
   )
   .post(
@@ -59,7 +73,13 @@ export const rfidTag = new Hono()
         rfidTag,
       });
 
-      return c.json(newTag);
+      return successResponse(
+        c,
+        newTag.serialize(),
+        "RFID tag created successfully",
+        undefined,
+        201
+      );
     }
   )
   .patch(
@@ -74,7 +94,7 @@ export const rfidTag = new Hono()
       "json",
       z.object({
         friendlyName: z.string(),
-        rfidTag: z.ostring(),
+        rfidTag: z.string(),
       })
     ),
     async (c) => {
@@ -90,7 +110,11 @@ export const rfidTag = new Hono()
         rfidTag,
       });
 
-      return c.json(tag.serialize());
+      return successResponse(
+        c,
+        tag.serialize(),
+        "RFID tag updated successfully"
+      );
     }
   )
   .delete(
@@ -110,6 +134,10 @@ export const rfidTag = new Hono()
 
       await tag.delete();
 
-      return c.json(tag.serialize());
+      return successResponse(
+        c,
+        tag.serialize(),
+        "RFID tag deleted successfully"
+      );
     }
   );

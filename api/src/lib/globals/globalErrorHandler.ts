@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 
-import type { StatusCode } from "hono/utils/http-status";
+import type { UnofficialStatusCode } from "hono/utils/http-status";
 
 export const globalErrorHandler = (c: Context) => {
   if (!c.error) return;
@@ -21,7 +21,7 @@ RepondedWith: ${humanReadableMessage}\n\
     {
       message: humanReadableMessage,
     },
-    c.res.status as StatusCode
+    c.res.status as UnofficialStatusCode
   );
 };
 

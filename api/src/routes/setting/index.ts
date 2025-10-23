@@ -2,11 +2,16 @@ import { Hono } from "hono";
 import { Setting } from "../../lib/models/Setting";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import { successResponse } from "../../lib/helpers/apiResponse";
 
 export const setting = new Hono()
   .get("/", async (c) => {
     const settings = await Setting.findOneOrThrow();
-    return c.json(settings.serialize());
+    return successResponse(
+      c,
+      settings.serialize(),
+      "Settings retrieved successfully"
+    );
   })
   .patch(
     "/",
@@ -38,6 +43,10 @@ export const setting = new Hono()
 
       await Setting.applyCurrentViaChangeConfiguration();
 
-      return c.json(settings.serialize());
+      return successResponse(
+        c,
+        settings.serialize(),
+        "Settings updated successfully"
+      );
     }
   );

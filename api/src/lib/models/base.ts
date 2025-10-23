@@ -197,6 +197,27 @@ export function generateBaseModel<
     }
 
     /**
+     * Counts records based on the provided expression builder.
+     */
+    static async count<M extends typeof BaseModel>(
+      this: ChildType<M>,
+      options: {
+        eb?: (
+          eb: ExpressionBuilder<DB, ExtractTableAlias<DB, T>>
+        ) => Expression<any>;
+      } = {},
+      trx?: Transaction<DB>
+    ) {
+      const result = await (trx ?? db)
+        .selectFrom(this.tableName)
+        .$if(!!options.eb, (qb) => qb.where(options.eb!))
+        .select((eb) => eb.fn.countAll<number>().as("count"))
+        .executeTakeFirst();
+
+      return Number(result?.count ?? 0);
+    }
+
+    /**
      * Finds one record based on the provided options or throws an HTTPException if not found.
      */
     static async findOneOrThrow<M extends typeof BaseModel>(

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { HTTPException } from "hono/http-exception";
 import { ResetTypeEnum } from "../ocpp/types";
 import { Setting } from "../../lib/models/Setting";
+import { successResponse } from "../../lib/helpers/apiResponse";
 
 export const charger = new Hono()
   .get(
@@ -21,10 +22,10 @@ export const charger = new Hono()
       const settings = await Setting.findOneOrThrow();
       const heartbeatIntervalWithBuffer = settings.heartbeatInterval + 10;
 
-      const chargers = await Charger.findMany({
-        limit,
-        offset,
-      });
+      const [chargers, totalCount] = await Promise.all([
+        Charger.findMany({ limit, offset }),
+        Charger.count(),
+      ]);
 
       const chargersWithConnectivity = chargers.map((charger) => {
         const lastHeartbeatTime = charger.lastHeartbeat
@@ -44,7 +45,12 @@ export const charger = new Hono()
         };
       });
 
-      return c.json(chargersWithConnectivity);
+      return successResponse(
+        c,
+        chargersWithConnectivity,
+        "Chargers retrieved successfully",
+        totalCount
+      );
     }
   )
   .patch(
@@ -85,7 +91,11 @@ export const charger = new Hono()
         shortcode,
       });
 
-      return c.json(charger.serialize());
+      return successResponse(
+        c,
+        charger.serialize(),
+        "Charger updated successfully"
+      );
     }
   )
   .delete(
@@ -109,7 +119,11 @@ export const charger = new Hono()
       }
       await existingCharger.delete();
 
-      return c.json(existingCharger.serialize());
+      return successResponse(
+        c,
+        existingCharger.serialize(),
+        "Charger deleted successfully"
+      );
     }
   )
   .post(
@@ -139,7 +153,13 @@ export const charger = new Hono()
         status: "Accepted",
       });
 
-      return c.json(newCharger.serialize(), 201);
+      return successResponse(
+        c,
+        newCharger.serialize(),
+        "Charger created successfully",
+        undefined,
+        201
+      );
     }
   )
   .post(
@@ -166,8 +186,12 @@ export const charger = new Hono()
 
       const data = await charger.reset(type);
 
-      return c.json({
-        success: data[2].status === "Accepted",
-      });
+      return successResponse(
+        c,
+        {
+          success: data[2].status === "Accepted",
+        },
+        "Reset command sent successfully"
+      );
     }
   );

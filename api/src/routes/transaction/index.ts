@@ -3,6 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { Transaction } from "../../lib/models/Transaction";
 import { Connector } from "../../lib/models/Connector";
+import { successResponse } from "../../lib/helpers/apiResponse";
 
 export const transaction = new Hono()
   .get(
@@ -16,12 +17,17 @@ export const transaction = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      const transactions = await Transaction.findMany({
-        limit,
-        offset,
-      });
-      return c.json(
-        transactions.reverse().map((transaction) => transaction.serialize())
+      
+      const [transactions, totalCount] = await Promise.all([
+        Transaction.findMany({ limit, offset }),
+        Transaction.count(),
+      ]);
+      
+      return successResponse(
+        c,
+        transactions.reverse().map((transaction) => transaction.serialize()),
+        "Transactions retrieved successfully",
+        totalCount
       );
     }
   )
@@ -36,17 +42,21 @@ export const transaction = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      const transactions = await Transaction.findMany({
-        limit,
-        offset,
-      });
+      
+      const [transactions, totalCount] = await Promise.all([
+        Transaction.findMany({ limit, offset }),
+        Transaction.count(),
+      ]);
 
-      return c.json(
+      return successResponse(
+        c,
         await Promise.all(
           transactions
             .reverse()
             .map((transaction) => transaction.getFullDetail())
-        )
+        ),
+        "Transaction details retrieved successfully",
+        totalCount
       );
     }
   )
@@ -66,7 +76,11 @@ export const transaction = new Hono()
         eb: (eb) => eb("id", "=", id),
       });
 
-      return c.json(transaction.serialize());
+      return successResponse(
+        c,
+        transaction.serialize(),
+        "Transaction retrieved successfully"
+      );
     }
   )
   .get(
@@ -84,7 +98,11 @@ export const transaction = new Hono()
         eb: (eb) => eb("id", "=", id),
       });
 
-      return c.json(await transaction.getFullDetail());
+      return successResponse(
+        c,
+        await transaction.getFullDetail(),
+        "Transaction details retrieved successfully"
+      );
     }
   )
   .get(
@@ -115,10 +133,12 @@ export const transaction = new Hono()
         });
       }
 
-      return c.json(
+      return successResponse(
+        c,
         await Promise.all(
           transactions.map((transaction) => transaction.getFullDetail())
-        )
+        ),
+        "Charger transactions retrieved successfully"
       );
     }
   )
@@ -137,10 +157,12 @@ export const transaction = new Hono()
         eb: (eb) => eb("connectorId", "=", connectorId),
       });
 
-      return c.json(
+      return successResponse(
+        c,
         await Promise.all(
           transactions.map((transaction) => transaction.getFullDetail())
-        )
+        ),
+        "Connector transactions retrieved successfully"
       );
     }
   )
@@ -161,6 +183,10 @@ export const transaction = new Hono()
 
       await transaction.delete();
 
-      return c.json(transaction.serialize());
+      return successResponse(
+        c,
+        transaction.serialize(),
+        "Transaction deleted successfully"
+      );
     }
   );

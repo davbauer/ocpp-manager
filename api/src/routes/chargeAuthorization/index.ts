@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { ChargeAuthorization } from "../../lib/models/ChargeAuthorization";
+import { successResponse } from "../../lib/helpers/apiResponse";
 
 export const chargeAuthorization = new Hono()
   .get(
@@ -15,12 +16,18 @@ export const chargeAuthorization = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      const authorizations = await ChargeAuthorization.findMany({
-        limit,
-        offset,
-      });
+      
+      const [authorizations, totalCount] = await Promise.all([
+        ChargeAuthorization.findMany({ limit, offset }),
+        ChargeAuthorization.count(),
+      ]);
 
-      return c.json(authorizations.map((auth) => auth.serialize()));
+      return successResponse(
+        c,
+        authorizations.map((auth) => auth.serialize()),
+        "Authorizations retrieved successfully",
+        totalCount
+      );
     }
   )
   .get(
@@ -34,15 +41,19 @@ export const chargeAuthorization = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      const authorizations = await ChargeAuthorization.findMany({
-        limit,
-        offset,
-      });
+      
+      const [authorizations, totalCount] = await Promise.all([
+        ChargeAuthorization.findMany({ limit, offset }),
+        ChargeAuthorization.count(),
+      ]);
 
-      return c.json(
+      return successResponse(
+        c,
         await Promise.all(
           authorizations.map((authorization) => authorization.getFullDetail())
-        )
+        ),
+        "Authorization details retrieved successfully",
+        totalCount
       );
     }
   )
@@ -65,7 +76,13 @@ export const chargeAuthorization = new Hono()
         rfidTagId: rfidTagId || null,
       });
 
-      return c.json(newAuthorization.serialize(), 201);
+      return successResponse(
+        c,
+        newAuthorization.serialize(),
+        "Authorization created successfully",
+        undefined,
+        201
+      );
     }
   )
   .patch(
@@ -98,7 +115,11 @@ export const chargeAuthorization = new Hono()
         rfidTagId: rfidTagId,
       });
 
-      return c.json(authorization.serialize());
+      return successResponse(
+        c,
+        authorization.serialize(),
+        "Authorization updated successfully"
+      );
     }
   )
   .delete(
@@ -118,6 +139,10 @@ export const chargeAuthorization = new Hono()
 
       await authorization.delete();
 
-      return c.json(authorization.serialize());
+      return successResponse(
+        c,
+        authorization.serialize(),
+        "Authorization deleted successfully"
+      );
     }
   );
