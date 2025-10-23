@@ -19,13 +19,17 @@ export const transaction = new Hono()
       const { limit, offset } = c.req.valid("query");
 
       const [transactions, totalCount] = await Promise.all([
-        Transaction.findMany({ limit, offset }),
+        Transaction.findMany({ 
+          limit, 
+          offset,
+          orderBy: { column: 'id', direction: 'desc' }
+        }),
         Transaction.count(),
       ]);
 
       return successResponse(
         c,
-        transactions.reverse().map((transaction) => transaction.serialize()),
+        transactions.map((transaction) => transaction.serialize()),
         "Transactions retrieved successfully",
         totalCount
       );
@@ -38,22 +42,68 @@ export const transaction = new Hono()
       z.object({
         limit: z.coerce.number().optional(),
         offset: z.coerce.number().optional(),
+        chargerId: z.coerce.number().optional(),
+        connectorId: z.coerce.number().optional(),
+        rfidTagId: z.coerce.number().optional(),
+        startDate: z.coerce.date().optional(),
+        endDate: z.coerce.date().optional(),
       })
     ),
     async (c) => {
-      const { limit, offset } = c.req.valid("query");
+      const { limit, offset, chargerId, connectorId, rfidTagId, startDate, endDate } = c.req.valid("query");
+
+      // Build filter conditions
+      const filters: Array<(eb: any) => any> = [];
+      
+      if (connectorId) {
+        filters.push((eb: any) => eb("connectorId", "=", connectorId));
+      } else if (chargerId) {
+        // If charger is specified but not connector, get all connectors for that charger
+        const chargers = await Connector.findMany({
+          eb: (eb) => eb("chargerId", "=", chargerId),
+        });
+        const connectorIds = chargers.map((c) => c.serialize().id);
+        if (connectorIds.length > 0) {
+          filters.push((eb: any) => eb("connectorId", "in", connectorIds));
+        }
+      }
+
+      if (rfidTagId) {
+        filters.push((eb: any) => 
+          eb("chargeAuthorizationId", "in", 
+            eb.selectFrom("ChargeAuthorization")
+              .select("id")
+              .where("rfidTagId", "=", rfidTagId)
+          )
+        );
+      }
+
+      if (startDate) {
+        filters.push((eb: any) => eb("startTime", ">=", startDate.toISOString()));
+      }
+
+      if (endDate) {
+        filters.push((eb: any) => eb("startTime", "<=", endDate.toISOString()));
+      }
+
+      const filterFn = filters.length > 0 
+        ? (eb: any) => eb.and(filters.map(f => f(eb)))
+        : undefined;
 
       const [transactions, totalCount] = await Promise.all([
-        Transaction.findMany({ limit, offset }),
-        Transaction.count(),
+        Transaction.findMany({ 
+          eb: filterFn, 
+          limit, 
+          offset,
+          orderBy: { column: 'id', direction: 'desc' }
+        }),
+        Transaction.count({ eb: filterFn }),
       ]);
 
       return successResponse(
         c,
         await Promise.all(
-          transactions
-            .reverse()
-            .map((transaction) => transaction.getFullDetail())
+          transactions.map((transaction) => transaction.getFullDetail())
         ),
         "Transaction details retrieved successfully",
         totalCount

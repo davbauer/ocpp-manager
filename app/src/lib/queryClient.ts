@@ -16,7 +16,13 @@ export const queryKeys = {
 		page,
 		limit
 	],
-	transactionDetail: (page?: number, limit?: number) => ['transaction-detail', page, limit],
+	transactionDetail: (page?: number, limit?: number, filters?: {
+		chargerId?: number;
+		connectorId?: number;
+		rfidTagId?: number;
+		startDate?: Date;
+		endDate?: Date;
+	}) => ['transaction-detail', page, limit, filters],
 	transactionByChargerDetail: (chargerId: number) => ['transaction-detail', 'charger', chargerId],
 	transactionByConnectorDetail: (connectorId: number) => [
 		'transaction-detail',
@@ -430,15 +436,34 @@ export const createMutationChargeAuthorizationDelete = () =>
 export const createQueryTransactionsDetail = (
 	page: number = 1,
 	limit: number = 20,
+	filters: {
+		chargerId?: number;
+		connectorId?: number;
+		rfidTagId?: number;
+		startDate?: Date;
+		endDate?: Date;
+	} = {},
 	refetchInterval?: number
 ) =>
 	createQuery({
 		refetchInterval,
-		queryKey: queryKeys.transactionDetail(page, limit),
-		queryFn: () =>
-			hClient.transaction.detail
-				.$get({ query: { limit: limit.toString(), offset: ((page - 1) * limit).toString() } })
-				.then((x) => x.json())
+		queryKey: queryKeys.transactionDetail(page, limit, filters),
+		queryFn: () => {
+			const queryParams: Record<string, string> = {
+				limit: limit.toString(),
+				offset: ((page - 1) * limit).toString()
+			};
+			
+			if (filters.chargerId) queryParams.chargerId = filters.chargerId.toString();
+			if (filters.connectorId) queryParams.connectorId = filters.connectorId.toString();
+			if (filters.rfidTagId) queryParams.rfidTagId = filters.rfidTagId.toString();
+			if (filters.startDate) queryParams.startDate = filters.startDate.toISOString();
+			if (filters.endDate) queryParams.endDate = filters.endDate.toISOString();
+			
+			return hClient.transaction.detail
+				.$get({ query: queryParams as any })
+				.then((x) => x.json());
+		}
 	});
 
 export const createQueryTransactionByIdDetail = (id: number, refetchInterval?: number) =>

@@ -179,12 +179,16 @@ export function generateBaseModel<
         ) => Expression<any>;
         limit?: number;
         offset?: number;
+        orderBy?: { column: keyof Selectable<DB[T]>; direction?: 'asc' | 'desc' };
       } = {},
       trx?: Transaction<DB>
     ) {
       const records = await (trx ?? db)
         .selectFrom(this.tableName)
         .$if(!!options.eb, (qb) => qb.where(options.eb!))
+        .$if(!!options.orderBy, (qb) => 
+          qb.orderBy(options.orderBy!.column as any, options.orderBy!.direction ?? 'asc')
+        )
         .$if(!!options.limit, (qb) => qb.limit(options.limit!))
         .$if(!!options.offset, (qb) => qb.offset(options.offset!))
         .selectAll()

@@ -22,6 +22,8 @@
 		"@tailwindcss/postcss": "^4.0.15",
 		"@tanstack/svelte-query": "^5.69.0",
 		"@types/node": "^22.13.11",
+		"@types/papaparse": "^5.3.16",
+		"@types/pikaday": "^1.7.9",
 		"daisyui": "^5.0.9",
 		"eslint": "^9.23.0",
 		"eslint-config-prettier": "^10.1.1",
@@ -42,7 +44,9 @@
 	},
 	"dependencies": {
 		"@tailwindcss/typography": "^0.5.16",
-		"date-fns": "^4.1.0"
+		"date-fns": "^4.1.0",
+		"papaparse": "^5.5.3",
+		"pikaday": "^1.8.2"
 	},
 	"packageManager": "yarn@4.5.1"
 }
