@@ -16,12 +16,12 @@ export const rfidTag = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      
+
       const [tags, totalCount] = await Promise.all([
         RfidTag.findMany({ limit, offset }),
         RfidTag.count(),
       ]);
-      
+
       return successResponse(
         c,
         tags.map((tag) => tag.serialize()),
@@ -41,7 +41,7 @@ export const rfidTag = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      
+
       const [tags, totalCount] = await Promise.all([
         RfidTag.findMany({ limit, offset }),
         RfidTag.count(),

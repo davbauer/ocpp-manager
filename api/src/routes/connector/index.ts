@@ -16,12 +16,12 @@ export const connector = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      
+
       const [connectors, totalCount] = await Promise.all([
         Connector.findMany({ limit, offset }),
         Connector.count(),
       ]);
-      
+
       return successResponse(
         c,
         connectors.map((connector) => connector.serialize()),
@@ -41,12 +41,12 @@ export const connector = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      
+
       const [connectors, totalCount] = await Promise.all([
         Connector.findMany({ limit, offset }),
         Connector.count(),
       ]);
-      
+
       return successResponse(
         c,
         await Promise.all(

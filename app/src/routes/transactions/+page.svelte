@@ -3,6 +3,7 @@
 
 	import BasePage from '$lib/components/BasePage.svelte';
 	import Scrollable from '$lib/components/Scrollable.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 	import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
 
 	function getFormattedDuration(start: string, end: string | null) {
@@ -11,7 +12,10 @@
 		return formatDuration(duration);
 	}
 
-	const queryTransactions = createQueryTransactionsDetail(10000);
+	let currentPage = $state(1);
+	const pageSize = 10;
+
+	const queryTransactions = $derived(createQueryTransactionsDetail(currentPage, pageSize, 10000));
 	const mutationTransactionDelete = createMutationTransactionDelete();
 
 	const deleteTransaction = (id: number) => {
@@ -21,9 +25,23 @@
 
 <BasePage title="Transactions">
 	<div class="container mx-auto px-4">
-		<Scrollable class="p-4" maxHeight="80svh">
-			<div class="space-y-6">
-				{#if $queryTransactions.data?.data && $queryTransactions.data.data.length > 0}
+		{#if $queryTransactions.isPending}
+			<div class="flex justify-center py-12">
+				<span class="loading loading-spinner loading-lg"></span>
+			</div>
+		{:else if $queryTransactions.data?.data && $queryTransactions.data.data.length > 0}
+			<Pagination
+				{currentPage}
+				totalCount={$queryTransactions.data?.total_count ?? 0}
+				{pageSize}
+				onPageChange={(newPage) => {
+					currentPage = newPage;
+				}}
+				class="mb-4"
+			/>
+
+			<Scrollable class="p-4" maxHeight="80svh">
+				<div class="space-y-6">
 					{#each $queryTransactions.data.data as transaction}
 						<div class="bg-base-200 rounded-lg p-6 shadow-md">
 							<div class="mb-4 flex items-center justify-between">
@@ -37,7 +55,7 @@
 								</div>
 								<button
 									class="btn btn-ghost btn-sm"
-									on:click={() => deleteTransaction(transaction.id)}
+									onclick={() => deleteTransaction(transaction.id)}
 								>
 									Delete
 								</button>
@@ -101,12 +119,12 @@
 							</table>
 						</div>
 					{/each}
-				{:else}
-					<div class="bg-base-200 rounded-lg p-8 text-center">
-						<p class="text-base-content">No Transactions Found</p>
-					</div>
-				{/if}
+				</div>
+			</Scrollable>
+		{:else}
+			<div class="bg-base-200 rounded-lg p-8 text-center">
+				<p class="text-base-content">No Transactions Found</p>
 			</div>
-		</Scrollable>
+		{/if}
 	</div>
 </BasePage>

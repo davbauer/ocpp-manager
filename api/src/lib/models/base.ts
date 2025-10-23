@@ -13,7 +13,7 @@ import { db } from "../db/db.js";
 
 export function generateBaseModel<
   T extends keyof DB,
-  PK extends Extract<keyof Selectable<DB[T]>, string>
+  PK extends Extract<keyof Selectable<DB[T]>, string>,
 >(table: T, primaryKey: PK, updatedAtField?: keyof Updateable<DB[T]>) {
   /**
    * Utility type that filters out function properties and explicitly excludes `t`.
@@ -22,8 +22,8 @@ export function generateBaseModel<
     [K in keyof T as K extends "t"
       ? never
       : T[K] extends (...args: any[]) => any
-      ? never
-      : K]: T[K];
+        ? never
+        : K]: T[K];
   };
 
   type ChildType<M extends typeof BaseModel> = M & {

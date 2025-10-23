@@ -5,14 +5,18 @@ import toast from 'svelte-french-toast';
 export const queryClient = new QueryClient();
 
 export const queryKeys = {
-	charger: ['charger'],
+	charger: (page?: number, limit?: number) => ['charger', page, limit],
 	log: ['log'],
 	setting: ['setting'],
 	connectorByidDetail: (connectorId: string) => ['connector-detail', connectorId],
-	rfidTagDetail: ['rfid-tag-detail'],
+	rfidTagDetail: (page?: number, limit?: number) => ['rfid-tag-detail', page, limit],
 	chargeAuthorization: ['charge-authorization'],
-	chargeAuthorizationDetail: ['charge-authorization-detail'],
-	transactionDetail: ['transaction-detail'],
+	chargeAuthorizationDetail: (page?: number, limit?: number) => [
+		'charge-authorization-detail',
+		page,
+		limit
+	],
+	transactionDetail: (page?: number, limit?: number) => ['transaction-detail', page, limit],
 	transactionByChargerDetail: (chargerId: number) => ['transaction-detail', 'charger', chargerId],
 	transactionByConnectorDetail: (connectorId: number) => [
 		'transaction-detail',
@@ -22,11 +26,18 @@ export const queryKeys = {
 	transactionByIdDetail: (id: number) => ['transaction-detail', 'id', id]
 };
 
-export const createQueryRfidTagDetail = (refetchInterval?: number) =>
+export const createQueryRfidTagDetail = (
+	page: number = 1,
+	limit: number = 20,
+	refetchInterval?: number
+) =>
 	createQuery({
 		refetchInterval,
-		queryKey: queryKeys.rfidTagDetail,
-		queryFn: () => hClient['rfid-tag'].detail.$get({query: {}}).then((x) => x.json())
+		queryKey: queryKeys.rfidTagDetail(page, limit),
+		queryFn: () =>
+			hClient['rfid-tag'].detail
+				.$get({ query: { limit: limit.toString(), offset: ((page - 1) * limit).toString() } })
+				.then((x) => x.json())
 	});
 
 export const createMutationRfidTagDelete = () =>
@@ -48,7 +59,7 @@ export const createMutationRfidTagDelete = () =>
 
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.rfidTagDetail
+				queryKey: ['rfid-tag-detail']
 			});
 		}
 	});
@@ -74,7 +85,7 @@ export const createMutationRfidTagCreate = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.rfidTagDetail
+				queryKey: ['rfid-tag-detail']
 			});
 		}
 	});
@@ -109,16 +120,23 @@ export const createMutationRfidTagUpdate = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.rfidTagDetail
+				queryKey: ['rfid-tag-detail']
 			});
 		}
 	});
 
-export const createQueryCharger = (refetchInterval?: number) =>
+export const createQueryCharger = (
+	page: number = 1,
+	limit: number = 20,
+	refetchInterval?: number
+) =>
 	createQuery({
 		refetchInterval,
-		queryKey: queryKeys.charger,
-		queryFn: () => hClient.charger.$get({ query: {} }).then((x) => x.json())
+		queryKey: queryKeys.charger(page, limit),
+		queryFn: () =>
+			hClient.charger
+				.$get({ query: { limit: limit.toString(), offset: ((page - 1) * limit).toString() } })
+				.then((x) => x.json())
 	});
 
 export const createQueryConnector = (chargerId: string, refetchInterval?: number) =>
@@ -126,12 +144,11 @@ export const createQueryConnector = (chargerId: string, refetchInterval?: number
 		refetchInterval,
 		queryKey: queryKeys.connectorByidDetail(chargerId),
 		queryFn: async () => {
-			const response = await hClient.connector.charger[':id'].detail
-				.$get({
-					param: {
-						id: chargerId
-					}
-				});
+			const response = await hClient.connector.charger[':id'].detail.$get({
+				param: {
+					id: chargerId
+				}
+			});
 			return response.json() as Promise<any>;
 		}
 	});
@@ -154,7 +171,7 @@ export const createMutationConnectorUnlock = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.charger
+				queryKey: ['charger']
 			});
 		}
 	});
@@ -188,7 +205,7 @@ export const createMutationChargerUpdate = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.charger
+				queryKey: ['charger']
 			});
 		}
 	});
@@ -211,7 +228,7 @@ export const createMutationChargerDelete = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.charger
+				queryKey: ['charger']
 			});
 		}
 	});
@@ -234,7 +251,7 @@ export const createMutationChargerCreate = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.charger
+				queryKey: ['charger']
 			});
 		}
 	});
@@ -295,16 +312,23 @@ export const createMutationSetting = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.charger
+				queryKey: ['charger']
 			});
 		}
 	});
 
-export const createQueryChargeAuthorizationDetail = (refetchInterval?: number) =>
+export const createQueryChargeAuthorizationDetail = (
+	page: number = 1,
+	limit: number = 20,
+	refetchInterval?: number
+) =>
 	createQuery({
 		refetchInterval,
-		queryKey: queryKeys.chargeAuthorizationDetail,
-		queryFn: () => hClient['charge-authorization'].detail.$get({query: {}}).then((x) => x.json())
+		queryKey: queryKeys.chargeAuthorizationDetail(page, limit),
+		queryFn: () =>
+			hClient['charge-authorization'].detail
+				.$get({ query: { limit: limit.toString(), offset: ((page - 1) * limit).toString() } })
+				.then((x) => x.json())
 	});
 
 export const createMutationChargeAuthorizationCreate = () =>
@@ -337,7 +361,7 @@ export const createMutationChargeAuthorizationCreate = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.chargeAuthorizationDetail
+				queryKey: ['charge-authorization-detail']
 			});
 		}
 	});
@@ -403,11 +427,18 @@ export const createMutationChargeAuthorizationDelete = () =>
 		}
 	});
 
-export const createQueryTransactionsDetail = (refetchInterval?: number) =>
+export const createQueryTransactionsDetail = (
+	page: number = 1,
+	limit: number = 20,
+	refetchInterval?: number
+) =>
 	createQuery({
 		refetchInterval,
-		queryKey: queryKeys.transactionDetail,
-		queryFn: () => hClient.transaction.detail.$get({query: {}}).then((x) => x.json())
+		queryKey: queryKeys.transactionDetail(page, limit),
+		queryFn: () =>
+			hClient.transaction.detail
+				.$get({ query: { limit: limit.toString(), offset: ((page - 1) * limit).toString() } })
+				.then((x) => x.json())
 	});
 
 export const createQueryTransactionByIdDetail = (id: number, refetchInterval?: number) =>
@@ -470,7 +501,7 @@ export const createMutationTransactionDelete = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: queryKeys.transactionDetail
+				queryKey: ['transaction-detail']
 			});
 		}
 	});

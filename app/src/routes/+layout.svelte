@@ -21,6 +21,7 @@
 	let time = $state(new Date());
 	let isSidebarMinimized = $state(false);
 	let loaded = $state(false);
+	let isScrolled = $state(false);
 	const isSidebarMinimizedLocalStorageKey = 'isSidebarMinimized';
 
 	$effect(() => {
@@ -50,6 +51,11 @@
 	function toggleSidebar() {
 		isSidebarMinimized = !isSidebarMinimized;
 	}
+
+	function handleScroll(e: Event) {
+		const target = e.target as HTMLElement;
+		isScrolled = target.scrollTop > 10;
+	}
 </script>
 
 <svelte:head>
@@ -58,19 +64,19 @@
 
 <Toaster position="bottom-right" />
 <QueryClientProvider client={queryClient}>
-	<div class="bg-base-100 flex h-screen">
+	<div class="bg-base-100 flex h-screen overflow-hidden">
 		<!-- Sidebar -->
 		{#if loaded}
 			<aside
 				class={`${
 					isSidebarMinimized ? 'w-24' : 'w-72'
-				} bg-base-200 text-base-content transition-width shrink-0 duration-300`}
+				} bg-base-200 text-base-content transition-width relative flex shrink-0 flex-col duration-300`}
 			>
-				<div class="flex h-full flex-col p-4">
-					<div class="relative">
+				<div class="flex h-full flex-col overflow-hidden p-4">
+					<div class="relative mb-4">
 						<button
 							onclick={toggleSidebar}
-							class="bg-base-200 border-base-content absolute -right-8 top-0 flex items-center justify-center rounded-full border-2 p-1"
+							class="bg-base-200 border-base-content absolute -right-7 top-2 z-50 flex items-center justify-center rounded-full border-2 p-1 shadow-lg"
 						>
 							{#if isSidebarMinimized}
 								<IconChevronRight class="text-base-content size-6" />
@@ -185,8 +191,12 @@
 			</aside>
 
 			<!-- Main Content -->
-			<div class="flex flex-1 flex-col">
-				<main class="bg-base-100 flex-1 p-8">
+			<div class="flex flex-1 flex-col overflow-hidden">
+				<main 
+					class="bg-base-100 flex-1 overflow-auto p-8 transition-shadow duration-300"
+					class:shadow-inner={isScrolled}
+					onscroll={handleScroll}
+				>
 					{@render children()}
 				</main>
 

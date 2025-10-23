@@ -3,6 +3,7 @@
 	import { createMutationChargerCreate, createQueryCharger } from '$lib/queryClient';
 	import MonitoringChargerRow from '$lib/components/MonitoringChargerRow.svelte';
 	import Scrollable from '$lib/components/Scrollable.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 	import { drawerStore } from '$lib/drawerStore';
 	import { z } from 'zod';
 
@@ -10,7 +11,10 @@
 	import { PUBLIC_DEV_BACKEND_URL } from '$env/static/public';
 	import { dev } from '$app/environment';
 
-	const queryChargers = createQueryCharger(10000);
+	let currentPage = $state(1);
+	const pageSize = 20;
+
+	const queryChargers = $derived(createQueryCharger(currentPage, pageSize, 10000));
 
 	const mutationChargerCreate = createMutationChargerCreate();
 
@@ -143,18 +147,33 @@
 				<button class="btn btn-primary" onclick={openCreateDrawer}>Add Charger</button>
 			</div>
 		</div>
-		<Scrollable class="p-4" maxHeight="80svh">
-			<div class="space-y-6">
-				{#if $queryChargers.data?.data}
+		
+		{#if $queryChargers.isPending}
+			<div class="flex justify-center py-12">
+				<span class="loading loading-spinner loading-lg"></span>
+			</div>
+		{:else if $queryChargers.data?.data && $queryChargers.data.data.length > 0}
+			<Pagination
+				currentPage={currentPage}
+				totalCount={$queryChargers.data?.total_count ?? 0}
+				pageSize={pageSize}
+				onPageChange={(newPage) => {
+					currentPage = newPage;
+				}}
+				class="mb-4"
+			/>
+
+			<Scrollable class="p-4" maxHeight="80svh">
+				<div class="space-y-6">
 					{#each $queryChargers.data.data as charger}
 						<MonitoringChargerRow {charger} />
 					{/each}
-				{:else}
-					<div class="bg-base-200 rounded-lg p-8 text-center">
-						<p class="text-base-content">Loading chargers...</p>
-					</div>
-				{/if}
+				</div>
+			</Scrollable>
+		{:else}
+			<div class="bg-base-200 rounded-lg p-8 text-center">
+				<p class="text-base-content">No chargers found</p>
 			</div>
-		</Scrollable>
+		{/if}
 	</div>
 </BasePage>

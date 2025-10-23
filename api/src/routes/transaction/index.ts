@@ -17,12 +17,12 @@ export const transaction = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      
+
       const [transactions, totalCount] = await Promise.all([
         Transaction.findMany({ limit, offset }),
         Transaction.count(),
       ]);
-      
+
       return successResponse(
         c,
         transactions.reverse().map((transaction) => transaction.serialize()),
@@ -42,7 +42,7 @@ export const transaction = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      
+
       const [transactions, totalCount] = await Promise.all([
         Transaction.findMany({ limit, offset }),
         Transaction.count(),

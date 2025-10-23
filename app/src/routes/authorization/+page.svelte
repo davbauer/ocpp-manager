@@ -13,10 +13,14 @@
 	import BasePage from '$lib/components/BasePage.svelte';
 	import IconLockPin from '$lib/icons/tabler/IconLockPin.svelte';
 	import Scrollable from '$lib/components/Scrollable.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 
-	const queryChargeAuthorizations = createQueryChargeAuthorizationDetail(10000);
-	const queryChargers = createQueryCharger(10000);
-	const queryRfidTags = createQueryRfidTagDetail(10000);
+	let currentPage = $state(1);
+	const pageSize = 20;
+
+	const queryChargeAuthorizations = $derived(createQueryChargeAuthorizationDetail(currentPage, pageSize, 10000));
+	const queryChargers = createQueryCharger(1, 1000, 10000);
+	const queryRfidTags = createQueryRfidTagDetail(1, 1000, 10000);
 
 	const mutationChargeAuthorizationCreate = createMutationChargeAuthorizationCreate();
 	const mutationChargeAuthorizationUpdate = createMutationChargeAuthorizationUpdate();
@@ -187,9 +191,23 @@
 			</button>
 		</div>
 
-		<Scrollable class="p-4" maxHeight="80svh">
-			<div class="space-y-6">
-				{#if $queryChargeAuthorizations.data?.data}
+		{#if $queryChargeAuthorizations.isPending}
+			<div class="flex justify-center py-12">
+				<span class="loading loading-spinner loading-lg"></span>
+			</div>
+		{:else if $queryChargeAuthorizations.data?.data && $queryChargeAuthorizations.data.data.length > 0}
+			<Pagination
+				currentPage={currentPage}
+				totalCount={$queryChargeAuthorizations.data?.total_count ?? 0}
+				pageSize={pageSize}
+				onPageChange={(newPage) => {
+					currentPage = newPage;
+				}}
+				class="mb-4"
+			/>
+
+			<Scrollable class="p-4" maxHeight="80svh">
+				<div class="space-y-6">
 					{#each $queryChargeAuthorizations.data.data as auth}
 						<div class="bg-base-200 rounded-lg p-6 shadow-md">
 							<div class="flex items-center justify-between">
@@ -224,17 +242,17 @@
 									<tr>
 										<td class="w-60 font-medium">Created</td>
 										<td>{formatDistanceToNow(new Date(auth.createdAt), { addSuffix: true })}</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 					{/each}
-				{:else}
-					<div class="bg-base-200 rounded-lg p-8 text-center">
-						<p class="text-base-content">Loading Charge Authorizations...</p>
-					</div>
-				{/if}
+				</div>
+			</Scrollable>
+		{:else}
+			<div class="bg-base-200 rounded-lg p-8 text-center">
+				<p class="text-base-content">No Charge Authorizations Found</p>
 			</div>
-		</Scrollable>
+		{/if}
 	</div>
 </BasePage>

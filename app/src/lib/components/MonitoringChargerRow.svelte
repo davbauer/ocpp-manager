@@ -14,8 +14,9 @@
 	import { formatDistanceToNow } from 'date-fns';
 	import IconPlug from '$lib/icons/tabler/IconPlug.svelte';
 
-	const { charger }: { charger: InferResponseType<(typeof hClient)['charger']['$get']>['data'][0] } =
-		$props();
+	const {
+		charger
+	}: { charger: InferResponseType<(typeof hClient)['charger']['$get']>['data'][0] } = $props();
 
 	const queryConnectors = createQueryConnector(charger.id.toString(), 10000);
 
@@ -143,10 +144,7 @@
 		);
 	};
 
-	function getPhaseValue(
-		data: any[],
-		phase: string
-	) {
+	function getPhaseValue(data: any[], phase: string) {
 		for (const entry of data) {
 			const phaseData = entry.sampledValue.find(
 				(item: any) => item.phase === phase && item.measurand === 'Current.Import'
@@ -158,10 +156,7 @@
 		return 'N/A';
 	}
 
-	function getMeasurandValue(
-		data: any[],
-		measurand: string
-	) {
+	function getMeasurandValue(data: any[], measurand: string) {
 		for (const entry of data) {
 			const measurandData = entry.sampledValue.find(
 				(item: any) => item.measurand === measurand && !item.phase

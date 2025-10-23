@@ -16,7 +16,7 @@ export const chargeAuthorization = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      
+
       const [authorizations, totalCount] = await Promise.all([
         ChargeAuthorization.findMany({ limit, offset }),
         ChargeAuthorization.count(),
@@ -41,7 +41,7 @@ export const chargeAuthorization = new Hono()
     ),
     async (c) => {
       const { limit, offset } = c.req.valid("query");
-      
+
       const [authorizations, totalCount] = await Promise.all([
         ChargeAuthorization.findMany({ limit, offset }),
         ChargeAuthorization.count(),

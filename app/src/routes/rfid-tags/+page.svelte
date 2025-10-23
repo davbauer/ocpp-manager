@@ -11,8 +11,12 @@
 	import BasePage from '$lib/components/BasePage.svelte';
 	import IconDeviceAirtag from '$lib/icons/tabler/IconDeviceAirtag.svelte';
 	import Scrollable from '$lib/components/Scrollable.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 
-	const queryRfidTags = createQueryRfidTagDetail(10000);
+	let currentPage = $state(1);
+	const pageSize = 20;
+
+	const queryRfidTags = $derived(createQueryRfidTagDetail(currentPage, pageSize, 10000));
 	const mutationRfidTagCreate = createMutationRfidTagCreate();
 	const mutationRfidTagDelete = createMutationRfidTagDelete();
 	const mutationRfidTagUpdate = createMutationRfidTagUpdate();
@@ -134,9 +138,23 @@
 			<button class="btn btn-primary" onclick={openCreateDrawer}>Add RFID Tag</button>
 		</div>
 
-		<Scrollable class="p-4" maxHeight="80svh">
-			<div class="space-y-6">
-				{#if $queryRfidTags.data?.data && $queryRfidTags.data.data.length > 0}
+		{#if $queryRfidTags.isPending}
+			<div class="flex justify-center py-12">
+				<span class="loading loading-spinner loading-lg"></span>
+			</div>
+		{:else if $queryRfidTags.data?.data && $queryRfidTags.data.data.length > 0}
+			<Pagination
+				currentPage={currentPage}
+				totalCount={$queryRfidTags.data?.total_count ?? 0}
+				pageSize={pageSize}
+				onPageChange={(newPage) => {
+					currentPage = newPage;
+				}}
+				class="mb-4"
+			/>
+
+			<Scrollable class="p-4" maxHeight="80svh">
+				<div class="space-y-6">
 					{#each $queryRfidTags.data.data as tag}
 						<div class="bg-base-200 rounded-lg p-6 shadow-md">
 							<div class="mb-6 flex items-center justify-between">
@@ -173,12 +191,12 @@
 							</table>
 						</div>
 					{/each}
-				{:else}
-					<div class="bg-base-200 rounded-lg p-8 text-center">
-						<p class="text-base-content">No RFID Tags Found</p>
-					</div>
-				{/if}
+				</div>
+			</Scrollable>
+		{:else}
+			<div class="bg-base-200 rounded-lg p-8 text-center">
+				<p class="text-base-content">No RFID Tags Found</p>
 			</div>
-		</Scrollable>
+		{/if}
 	</div>
 </BasePage>
