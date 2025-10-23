@@ -54,7 +54,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./postgres:/var/lib/postgresql
     restart: unless-stopped
 ```
 

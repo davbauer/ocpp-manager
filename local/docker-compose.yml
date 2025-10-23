@@ -6,6 +6,6 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./postgres:/var/lib/postgresql
     ports:
       - "5432:5432"
