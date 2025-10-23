@@ -1,5 +1,13 @@
 node_modules
 
+# Yarn cache (if using zero-installs)
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 # Output
 .output
 .vercel

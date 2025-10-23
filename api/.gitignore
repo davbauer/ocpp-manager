@@ -1,6 +1,11 @@
 # dev
-.yarn/
+# Yarn cache (if using zero-installs)
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
 !.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 .vscode/*
 !.vscode/launch.json
 !.vscode/*.code-snippets
