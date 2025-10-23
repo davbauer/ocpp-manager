@@ -178,6 +178,7 @@ export function generateBaseModel<
           eb: ExpressionBuilder<DB, ExtractTableAlias<DB, T>>
         ) => Expression<any>;
         limit?: number;
+        offset?: number;
       } = {},
       trx?: Transaction<DB>
     ) {
@@ -185,6 +186,7 @@ export function generateBaseModel<
         .selectFrom(this.tableName)
         .$if(!!options.eb, (qb) => qb.where(options.eb!))
         .$if(!!options.limit, (qb) => qb.limit(options.limit!))
+        .$if(!!options.offset, (qb) => qb.offset(options.offset!))
         .selectAll()
         .execute();
 

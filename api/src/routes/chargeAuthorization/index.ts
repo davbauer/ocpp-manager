@@ -4,20 +4,48 @@ import { z } from "zod";
 import { ChargeAuthorization } from "../../lib/models/ChargeAuthorization";
 
 export const chargeAuthorization = new Hono()
-  .get("/", async (c) => {
-    const authorizations = await ChargeAuthorization.findMany();
+  .get(
+    "/",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const authorizations = await ChargeAuthorization.findMany({
+        limit,
+        offset,
+      });
 
-    return c.json(authorizations.map((auth) => auth.serialize()));
-  })
-  .get("/detail", async (c) => {
-    const authorizations = await ChargeAuthorization.findMany();
+      return c.json(authorizations.map((auth) => auth.serialize()));
+    }
+  )
+  .get(
+    "/detail",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const authorizations = await ChargeAuthorization.findMany({
+        limit,
+        offset,
+      });
 
-    return c.json(
-      await Promise.all(
-        authorizations.map((authorization) => authorization.getFullDetail())
-      )
-    );
-  })
+      return c.json(
+        await Promise.all(
+          authorizations.map((authorization) => authorization.getFullDetail())
+        )
+      );
+    }
+  )
   .post(
     "/",
     zValidator(

@@ -7,32 +7,46 @@ import { ResetTypeEnum } from "../ocpp/types";
 import { Setting } from "../../lib/models/Setting";
 
 export const charger = new Hono()
-  .get("/", async (c) => {
-    const settings = await Setting.findOneOrThrow();
-    const heartbeatIntervalWithBuffer = settings.heartbeatInterval + 10;
+  .get(
+    "/",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const settings = await Setting.findOneOrThrow();
+      const heartbeatIntervalWithBuffer = settings.heartbeatInterval + 10;
 
-    const chargers = await Charger.findMany();
+      const chargers = await Charger.findMany({
+        limit,
+        offset,
+      });
 
-    const chargersWithConnectivity = chargers.map((charger) => {
-      const lastHeartbeatTime = charger.lastHeartbeat
-        ? new Date(charger.lastHeartbeat).getTime()
-        : 0;
-      const now = Date.now();
+      const chargersWithConnectivity = chargers.map((charger) => {
+        const lastHeartbeatTime = charger.lastHeartbeat
+          ? new Date(charger.lastHeartbeat).getTime()
+          : 0;
+        const now = Date.now();
 
-      const connectivity: "Online" | "Offline" =
-        lastHeartbeatTime > 0 &&
-        now - lastHeartbeatTime <= heartbeatIntervalWithBuffer * 1000
-          ? "Online"
-          : "Offline";
+        const connectivity: "Online" | "Offline" =
+          lastHeartbeatTime > 0 &&
+          now - lastHeartbeatTime <= heartbeatIntervalWithBuffer * 1000
+            ? "Online"
+            : "Offline";
 
-      return {
-        ...charger.serialize(),
-        connectivity,
-      };
-    });
+        return {
+          ...charger.serialize(),
+          connectivity,
+        };
+      });
 
-    return c.json(chargersWithConnectivity);
-  })
+      return c.json(chargersWithConnectivity);
+    }
+  )
   .patch(
     "/:id",
     zValidator(

@@ -4,15 +4,43 @@ import { z } from "zod";
 import { RfidTag } from "../../lib/models/RfidTag";
 
 export const rfidTag = new Hono()
-  .get("/", async (c) => {
-    const tags = await RfidTag.findMany();
-    return c.json(tags.map((tag) => tag.serialize()));
-  })
-  .get("/detail", async (c) => {
-    const tags = await RfidTag.findMany();
+  .get(
+    "/",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const tags = await RfidTag.findMany({
+        limit,
+        offset,
+      });
+      return c.json(tags.map((tag) => tag.serialize()));
+    }
+  )
+  .get(
+    "/detail",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const tags = await RfidTag.findMany({
+        limit,
+        offset,
+      });
 
-    return c.json(await Promise.all(tags.map((tag) => tag.getFullDetail())));
-  })
+      return c.json(await Promise.all(tags.map((tag) => tag.getFullDetail())));
+    }
+  )
   .post(
     "/",
     zValidator(

@@ -4,18 +4,46 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 
 export const connector = new Hono()
-  .get("/", async (c) => {
-    const connectors = await Connector.findMany();
-    return c.json(connectors.map((connector) => connector.serialize()));
-  })
-  .get("/detail", async (c) => {
-    const connectors = await Connector.findMany();
-    return c.json(
-      await Promise.all(
-        connectors.map((connector) => connector.getDetailData())
-      )
-    );
-  })
+  .get(
+    "/",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const connectors = await Connector.findMany({
+        limit,
+        offset,
+      });
+      return c.json(connectors.map((connector) => connector.serialize()));
+    }
+  )
+  .get(
+    "/detail",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const connectors = await Connector.findMany({
+        limit,
+        offset,
+      });
+      return c.json(
+        await Promise.all(
+          connectors.map((connector) => connector.getDetailData())
+        )
+      );
+    }
+  )
   .post(
     "/:id/unlock-connector",
     zValidator(

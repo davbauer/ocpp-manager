@@ -5,21 +5,51 @@ import { Transaction } from "../../lib/models/Transaction";
 import { Connector } from "../../lib/models/Connector";
 
 export const transaction = new Hono()
-  .get("/", async (c) => {
-    const transactions = await Transaction.findMany();
-    return c.json(
-      transactions.reverse().map((transaction) => transaction.serialize())
-    );
-  })
-  .get("/detail", async (c) => {
-    const transactions = await Transaction.findMany();
+  .get(
+    "/",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const transactions = await Transaction.findMany({
+        limit,
+        offset,
+      });
+      return c.json(
+        transactions.reverse().map((transaction) => transaction.serialize())
+      );
+    }
+  )
+  .get(
+    "/detail",
+    zValidator(
+      "query",
+      z.object({
+        limit: z.coerce.number().optional(),
+        offset: z.coerce.number().optional(),
+      })
+    ),
+    async (c) => {
+      const { limit, offset } = c.req.valid("query");
+      const transactions = await Transaction.findMany({
+        limit,
+        offset,
+      });
 
-    return c.json(
-      await Promise.all(
-        transactions.reverse().map((transaction) => transaction.getFullDetail())
-      )
-    );
-  })
+      return c.json(
+        await Promise.all(
+          transactions
+            .reverse()
+            .map((transaction) => transaction.getFullDetail())
+        )
+      );
+    }
+  )
 
   .get(
     "/:id",
