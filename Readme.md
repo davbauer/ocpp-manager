@@ -39,23 +39,39 @@ services:
     image: ghcr.io/davbauer/ocpp-manager:latest
     environment:
       DATABASE_URL: postgres://root:password@postgres:5432/app
-    volumes:
-      - ./logs:/workspace/api/logs
+      NODE_ENV: production
     ports:
       - "3000:3000"
     depends_on:
       - postgres
+    volumes:
+      - logs_data:/workspace/api/logs
     restart: unless-stopped
+    networks:
+      - ocpp_net
+
   postgres:
     container_name: ocpp-manager-postgres
-    image: postgres:latest
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app
     volumes:
-      - ./postgres:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql
     restart: unless-stopped
+    networks:
+      - ocpp_net
+
+volumes:
+  postgres_data:
+    name: ocpp-manager_postgres_data
+  logs_data:
+    name: ocpp-manager_logs_data
+
+networks:
+  ocpp_net:
+    driver: bridge
 ```
 
 This will pull the latest image of the OCPP Manager from GitHub Container Registry and set up the required PostgreSQL database.
