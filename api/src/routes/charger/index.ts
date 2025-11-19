@@ -23,7 +23,11 @@ export const charger = new Hono()
       const heartbeatIntervalWithBuffer = settings.heartbeatInterval + 10;
 
       const [chargers, totalCount] = await Promise.all([
-        Charger.findMany({ limit, offset }),
+        Charger.findMany({
+          limit,
+          offset,
+          orderBy: { column: "createdAt", direction: "asc" },
+        }),
         Charger.count(),
       ]);
 

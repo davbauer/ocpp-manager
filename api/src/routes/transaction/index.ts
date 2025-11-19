@@ -19,10 +19,10 @@ export const transaction = new Hono()
       const { limit, offset } = c.req.valid("query");
 
       const [transactions, totalCount] = await Promise.all([
-        Transaction.findMany({ 
-          limit, 
+        Transaction.findMany({
+          limit,
           offset,
-          orderBy: { column: 'id', direction: 'desc' }
+          orderBy: { column: "id", direction: "desc" },
         }),
         Transaction.count(),
       ]);
@@ -50,11 +50,19 @@ export const transaction = new Hono()
       })
     ),
     async (c) => {
-      const { limit, offset, chargerId, connectorId, rfidTagId, startDate, endDate } = c.req.valid("query");
+      const {
+        limit,
+        offset,
+        chargerId,
+        connectorId,
+        rfidTagId,
+        startDate,
+        endDate,
+      } = c.req.valid("query");
 
       // Build filter conditions
       const filters: Array<(eb: any) => any> = [];
-      
+
       if (connectorId) {
         filters.push((eb: any) => eb("connectorId", "=", connectorId));
       } else if (chargerId) {
@@ -69,9 +77,12 @@ export const transaction = new Hono()
       }
 
       if (rfidTagId) {
-        filters.push((eb: any) => 
-          eb("chargeAuthorizationId", "in", 
-            eb.selectFrom("ChargeAuthorization")
+        filters.push((eb: any) =>
+          eb(
+            "chargeAuthorizationId",
+            "in",
+            eb
+              .selectFrom("ChargeAuthorization")
               .select("id")
               .where("rfidTagId", "=", rfidTagId)
           )
@@ -79,23 +90,26 @@ export const transaction = new Hono()
       }
 
       if (startDate) {
-        filters.push((eb: any) => eb("startTime", ">=", startDate.toISOString()));
+        filters.push((eb: any) =>
+          eb("startTime", ">=", startDate.toISOString())
+        );
       }
 
       if (endDate) {
         filters.push((eb: any) => eb("startTime", "<=", endDate.toISOString()));
       }
 
-      const filterFn = filters.length > 0 
-        ? (eb: any) => eb.and(filters.map(f => f(eb)))
-        : undefined;
+      const filterFn =
+        filters.length > 0
+          ? (eb: any) => eb.and(filters.map((f) => f(eb)))
+          : undefined;
 
       const [transactions, totalCount] = await Promise.all([
-        Transaction.findMany({ 
-          eb: filterFn, 
-          limit, 
+        Transaction.findMany({
+          eb: filterFn,
+          limit,
           offset,
-          orderBy: { column: 'id', direction: 'desc' }
+          orderBy: { column: "id", direction: "desc" },
         }),
         Transaction.count({ eb: filterFn }),
       ]);

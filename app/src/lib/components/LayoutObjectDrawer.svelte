@@ -248,9 +248,9 @@
 
 									<!-- Error messages with consistent style -->
 									{#if fieldErrors[field.name]}
-										<label class="label pt-1">
+										<div class="label pt-1" role="alert" aria-live="polite">
 											<span class="label-text-alt text-error">{fieldErrors[field.name]}</span>
-										</label>
+										</div>
 									{/if}
 								</div>
 							{/each}

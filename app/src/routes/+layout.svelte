@@ -1,28 +1,17 @@
 <script lang="ts">
 	import '../app.css';
-	import IconAdjustments from '$lib/icons/tabler/IconAdjustments.svelte';
-	import IconInvoice from '$lib/icons/tabler/IconInvoice.svelte';
-	import IconUniverse from '$lib/icons/tabler/IconUniverse.svelte';
 	import Logo from '$lib/media/Logo.svelte';
-	import IconChevronLeft from '$lib/icons/tabler/IconChevronLeft.svelte';
-	import IconChevronRight from '$lib/icons/tabler/IconChevronRight.svelte';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import IconLogs from '$lib/icons/tabler/IconLogs.svelte';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
 	import { queryClient } from '$lib/queryClient';
-	import IconLockPin from '$lib/icons/tabler/IconLockPin.svelte';
 	import LayoutObjectDrawer from '$lib/components/LayoutObjectDrawer.svelte';
-	import IconDeviceAirtag from '$lib/icons/tabler/IconDeviceAirtag.svelte';
-	import IconBolt from '$lib/icons/tabler/IconBolt.svelte';
 	import { Toaster } from 'svelte-french-toast';
+	import { Dialog } from '@ark-ui/svelte/dialog';
+	import { Settings, FileText, Activity, ScrollText, Lock, Tag, Zap, Menu, X } from 'lucide-svelte';
 
 	let { children } = $props();
 	let time = $state(new Date());
-	let isSidebarMinimized = $state(false);
-	let loaded = $state(false);
-	let isScrolled = $state(false);
-	const isSidebarMinimizedLocalStorageKey = 'isSidebarMinimized';
+	let mobileMenuOpen = $state(false);
 
 	$effect(() => {
 		const interval = setInterval(() => {
@@ -32,30 +21,19 @@
 		return () => clearInterval(interval);
 	});
 
-	onMount(() => {
-		const savedState = localStorage.getItem(isSidebarMinimizedLocalStorageKey);
-		if (savedState !== null) {
-			isSidebarMinimized = JSON.parse(savedState);
-		}
-		loaded = true;
-	});
-
-	$effect(() => {
-		localStorage.setItem(isSidebarMinimizedLocalStorageKey, JSON.stringify(isSidebarMinimized));
-	});
-
 	function isActiveRoute(href: string): boolean {
 		return $page.url.pathname === href;
 	}
 
-	function toggleSidebar() {
-		isSidebarMinimized = !isSidebarMinimized;
-	}
-
-	function handleScroll(e: Event) {
-		const target = e.target as HTMLElement;
-		isScrolled = target.scrollTop > 10;
-	}
+	const navItems = [
+		{ href: '/monitoring', label: 'Monitoring', icon: Activity },
+		{ href: '/transactions', label: 'Transactions', icon: Zap },
+		{ href: '/rfid-tags', label: 'RFID Tags', icon: Tag },
+		{ href: '/authorization', label: 'Authorization', icon: Lock },
+		{ href: '/invoices', label: 'Invoices', icon: FileText, badge: 'Soon' },
+		{ href: '/administration', label: 'Administration', icon: Settings },
+		{ href: '/logs', label: 'Logs', icon: ScrollText }
+	];
 </script>
 
 <svelte:head>
@@ -64,147 +42,100 @@
 
 <Toaster position="bottom-right" />
 <QueryClientProvider client={queryClient}>
-	<div class="bg-base-100 flex h-screen overflow-hidden">
-		<!-- Sidebar -->
-		{#if loaded}
-			<aside
-				class={`${
-					isSidebarMinimized ? 'w-24' : 'w-72'
-				} bg-base-200 text-base-content transition-width relative flex shrink-0 flex-col duration-300`}
-			>
-				<div class="flex h-full flex-col overflow-hidden p-4">
-					<div class="relative mb-4">
-						<button
-							onclick={toggleSidebar}
-							class="bg-base-200 border-base-content absolute -right-7 top-2 z-50 flex items-center justify-center rounded-full border-2 p-1 shadow-lg"
+	<div class="bg-base-100 flex h-screen flex-col overflow-hidden">
+		<!-- Top Navigation Bar -->
+		<header class="navbar bg-base-200 border-base-300 z-50 border-b px-4 shadow-sm">
+			<div class="navbar-start">
+				<Dialog.Root open={mobileMenuOpen} onOpenChange={(e) => (mobileMenuOpen = e.open)}>
+					<!-- Mobile menu button -->
+					<Dialog.Trigger class="btn btn-ghost btn-circle lg:hidden">
+						<Menu class="size-6" />
+					</Dialog.Trigger>
+
+					<Dialog.Backdrop class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
+					<Dialog.Positioner class="fixed inset-0 z-50 lg:hidden">
+						<Dialog.Content
+							class="bg-base-200 fixed left-0 top-0 flex h-full w-80 flex-col shadow-xl"
 						>
-							{#if isSidebarMinimized}
-								<IconChevronRight class="text-base-content size-6" />
-							{:else}
-								<IconChevronLeft class="text-base-content size-6" />
-							{/if}
-						</button>
-					</div>
+							<div class="border-base-300 flex items-center justify-between border-b p-4">
+								<div class="flex items-center gap-3">
+									<Logo class="size-8" />
+									<h1 class="text-xl font-bold">OCPP Manager</h1>
+								</div>
+								<Dialog.CloseTrigger class="btn btn-ghost btn-sm btn-circle">
+									<X class="size-5" />
+								</Dialog.CloseTrigger>
+							</div>
 
-					<ul class="menu flex flex-col space-y-4">
-						<li class="mb-10">
-							<a
-								href="/"
-								class:btn-active={isActiveRoute('/')}
-								class:justify-center={isSidebarMinimized}
-								class="item flex items-center text-lg font-bold"
-							>
-								<Logo class="size-6" />
+							<nav class="flex-1 overflow-y-auto p-4">
+								<ul class="menu gap-2">
+									{#each navItems as item}
+										<li>
+											<a
+												href={item.href}
+												class:active={isActiveRoute(item.href)}
+												class="flex items-center gap-3 text-base"
+												onclick={() => (mobileMenuOpen = false)}
+											>
+												<svelte:component this={item.icon} class="size-5" />
+												<span>{item.label}</span>
+												{#if item.badge}
+													<span class="badge badge-sm badge-outline ml-auto">{item.badge}</span>
+												{/if}
+											</a>
+										</li>
+									{/each}
+								</ul>
+							</nav>
 
-								<p class:hidden={isSidebarMinimized} class="ml-4 text-nowrap">OCPP Manager</p>
-							</a>
-						</li>
-						<li>
-							<a
-								href="/monitoring"
-								class:btn-active={isActiveRoute('/monitoring')}
-								class:justify-center={isSidebarMinimized}
-								class="item flex items-center text-lg font-bold"
-							>
-								<IconUniverse class=" size-6" />
+							<div class="border-base-300 border-t p-4">
+								<div class="text-center text-sm opacity-60">
+									{time.toLocaleTimeString()}
+								</div>
+							</div>
+						</Dialog.Content>
+					</Dialog.Positioner>
+				</Dialog.Root>
 
-								<p class:hidden={isSidebarMinimized} class="ml-4 text-nowrap">Monitoring</p>
-							</a>
-						</li>
-						<li>
-							<a
-								href="/transactions"
-								class:btn-active={isActiveRoute('/transactions')}
-								class:justify-center={isSidebarMinimized}
-								class="item flex items-center text-lg font-bold"
-							>
-								<IconBolt class=" size-6" />
-
-								<p class:hidden={isSidebarMinimized} class="ml-4 text-nowrap">Transactions</p>
-							</a>
-						</li>
-						<li>
-							<a
-								href="/rfid-tags"
-								class:btn-active={isActiveRoute('/rfid-tags')}
-								class:justify-center={isSidebarMinimized}
-								class="item flex items-center text-lg font-bold"
-							>
-								<IconDeviceAirtag class=" size-6" />
-
-								<p class:hidden={isSidebarMinimized} class="ml-4 text-nowrap">RFID Tags</p>
-							</a>
-						</li>
-						<li>
-							<a
-								href="/authorization"
-								class:btn-active={isActiveRoute('/authorization')}
-								class:justify-center={isSidebarMinimized}
-								class="item flex items-center text-lg font-bold"
-							>
-								<IconLockPin class=" size-6" />
-
-								<p class:hidden={isSidebarMinimized} class="ml-4 text-nowrap">Authorization</p>
-							</a>
-						</li>
-						<li>
-							<a
-								href="/invoices"
-								class:btn-active={isActiveRoute('/invoices')}
-								class:justify-center={isSidebarMinimized}
-								class="item indicator flex w-full items-center text-lg font-bold"
-							>
-								<IconInvoice class="size-6" />
-
-								<span
-									class:hidden={isSidebarMinimized}
-									class="indicator-item badge badge-outline right-10 mt-2 opacity-45"
-									>Coming Soon</span
-								>
-								<p class:hidden={isSidebarMinimized} class="ml-4 text-nowrap">Invoices</p>
-							</a>
-						</li>
-						<li>
-							<a
-								href="/administration"
-								class:btn-active={isActiveRoute('/administration')}
-								class:justify-center={isSidebarMinimized}
-								class="item flex items-center text-lg font-bold"
-							>
-								<IconAdjustments class="size-6" />
-								<p class:hidden={isSidebarMinimized} class="ml-4 text-nowrap">Administration</p>
-							</a>
-						</li>
-						<li>
-							<a
-								href="/logs"
-								class:btn-active={isActiveRoute('/logs')}
-								class:justify-center={isSidebarMinimized}
-								class="item flex items-center text-lg font-bold"
-							>
-								<IconLogs class="size-6" />
-								<p class:hidden={isSidebarMinimized} class="ml-4 text-nowrap">Logs</p>
-							</a>
-						</li>
-					</ul>
-				</div>
-			</aside>
-
-			<!-- Main Content -->
-			<div class="flex flex-1 flex-col overflow-hidden">
-				<main 
-					class="bg-base-100 flex-1 overflow-auto p-8 transition-shadow duration-300"
-					class:shadow-inner={isScrolled}
-					onscroll={handleScroll}
-				>
-					{@render children()}
-				</main>
-
-				<footer class="bg-base-200 p-4 text-center text-sm">
-					<p>{time.toLocaleTimeString()}</p>
-				</footer>
+				<!-- Logo and Title -->
+				<a href="/" class="flex items-center gap-3 px-2">
+					<Logo class="size-8" />
+					<h1 class="hidden text-xl font-bold sm:block">OCPP Manager</h1>
+				</a>
 			</div>
-		{/if}
+
+			<!-- Desktop Navigation -->
+			<div class="navbar-center hidden lg:flex">
+				<ul class="menu menu-horizontal gap-1">
+					{#each navItems as item}
+						<li>
+							<a
+								href={item.href}
+								class:active={isActiveRoute(item.href)}
+								class="flex items-center gap-2"
+							>
+								<svelte:component this={item.icon} class="size-4" />
+								<span>{item.label}</span>
+								{#if item.badge}
+									<span class="badge badge-xs badge-outline">{item.badge}</span>
+								{/if}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			</div>
+
+			<div class="navbar-end">
+				<div class="hidden text-sm opacity-60 sm:block">
+					{time.toLocaleTimeString()}
+				</div>
+			</div>
+		</header>
+
+		<!-- Main Content Area -->
+		<main class="flex-1 overflow-auto">
+			{@render children()}
+		</main>
 	</div>
 	<LayoutObjectDrawer />
 </QueryClientProvider>

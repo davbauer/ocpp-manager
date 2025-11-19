@@ -87,9 +87,10 @@
 	{#if totalPages > 1}
 		<div class="flex items-center justify-between gap-4">
 			<!-- Info text -->
-			<div class="text-xs text-base-content/70">
+			<div class="text-base-content/70 text-xs">
 				{#if totalCount > 0}
-					<span class="font-medium">{startItem}-{endItem}</span> of <span class="font-medium">{totalCount}</span>
+					<span class="font-medium">{startItem}-{endItem}</span> of
+					<span class="font-medium">{totalCount}</span>
 				{/if}
 			</div>
 

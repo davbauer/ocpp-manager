@@ -1,6 +1,5 @@
 <script lang="ts">
 	import BasePage from '$lib/components/BasePage.svelte';
-	import IconInfoCircle from '$lib/icons/tabler/IconInfoCircle.svelte';
 	import { createMutationSetting, createQuerySetting } from '$lib/queryClient';
 	const querySettings = createQuerySetting();
 	const mutationSettings = createMutationSetting();
@@ -46,7 +45,7 @@
 						data-tip="Sets how often (in seconds) the charge point sends a heartbeat to the server."
 						class="tooltip mb-2 flex w-fit items-center gap-x-2 text-sm font-medium"
 					>
-						Heartbeat Interval (seconds) <IconInfoCircle class="size-4" />
+						Heartbeat Interval (seconds)
 					</label>
 					<input
 						id="heartbeatInterval"
@@ -68,7 +67,7 @@
 						data-tip="Defines how often (in seconds) the charge point sends meter updates during charging."
 						class="tooltip mb-2 flex w-fit items-center gap-x-2 text-sm font-medium"
 					>
-						Meter Value Sample Interval (seconds) <IconInfoCircle class="size-4" />
+						Meter Value Sample Interval (seconds)
 					</label>
 
 					<input
@@ -91,7 +90,7 @@
 						data-tip="Defines how often (in seconds) the charge point sends periodic updates, apart from its status."
 						class="tooltip mb-2 flex w-fit items-center gap-x-2 text-sm font-medium"
 					>
-						Clock Aligned Data Interval (seconds) <IconInfoCircle class="size-4" />
+						Clock Aligned Data Interval (seconds)
 					</label>
 
 					<input
@@ -107,10 +106,14 @@
 					/>
 				</div>
 
-				<button type="submit" class="btn btn-primary w-full" disabled={$mutationSettings.isPending}>
+				<button
+					type="submit"
+					class="btn btn-primary btn-sm w-full"
+					disabled={$mutationSettings.isPending}
+				>
 					{#if $mutationSettings.isPending}
 						<span class="loading loading-spinner"></span>
-					{/if} Update Settings
+					{/if} Save
 				</button>
 			</form>
 		{/if}

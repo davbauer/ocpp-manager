@@ -53,15 +53,17 @@ export class ChargeAuthorization extends generateBaseModel(
       Charger.findOneOrThrow({
         eb: (eb) => eb("id", "=", this.chargerId),
       }),
-      RfidTag.findOneOrThrow({
-        eb: (eb) => eb("id", "=", this.rfidTagId),
-      }),
+      this.rfidTagId
+        ? RfidTag.findOneOrThrow({
+            eb: (eb) => eb("id", "=", this.rfidTagId),
+          })
+        : null,
     ]);
 
     return {
       ...this.serialize(),
       charger: charger.serialize(),
-      tag: tag.serialize(),
+      tag: tag ? tag.serialize() : null,
     };
   }
 }

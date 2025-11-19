@@ -18,7 +18,11 @@ export const chargeAuthorization = new Hono()
       const { limit, offset } = c.req.valid("query");
 
       const [authorizations, totalCount] = await Promise.all([
-        ChargeAuthorization.findMany({ limit, offset }),
+        ChargeAuthorization.findMany({
+          limit,
+          offset,
+          orderBy: { column: "createdAt", direction: "asc" },
+        }),
         ChargeAuthorization.count(),
       ]);
 
@@ -43,7 +47,11 @@ export const chargeAuthorization = new Hono()
       const { limit, offset } = c.req.valid("query");
 
       const [authorizations, totalCount] = await Promise.all([
-        ChargeAuthorization.findMany({ limit, offset }),
+        ChargeAuthorization.findMany({
+          limit,
+          offset,
+          orderBy: { column: "createdAt", direction: "asc" },
+        }),
         ChargeAuthorization.count(),
       ]);
 

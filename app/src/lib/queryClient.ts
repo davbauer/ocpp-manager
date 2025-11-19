@@ -16,13 +16,17 @@ export const queryKeys = {
 		page,
 		limit
 	],
-	transactionDetail: (page?: number, limit?: number, filters?: {
-		chargerId?: number;
-		connectorId?: number;
-		rfidTagId?: number;
-		startDate?: Date;
-		endDate?: Date;
-	}) => ['transaction-detail', page, limit, filters],
+	transactionDetail: (
+		page?: number,
+		limit?: number,
+		filters?: {
+			chargerId?: number;
+			connectorId?: number;
+			rfidTagId?: number;
+			startDate?: Date;
+			endDate?: Date;
+		}
+	) => ['transaction-detail', page, limit, filters],
 	transactionByChargerDetail: (chargerId: number) => ['transaction-detail', 'charger', chargerId],
 	transactionByConnectorDetail: (connectorId: number) => [
 		'transaction-detail',
@@ -405,7 +409,7 @@ export const createMutationChargeAuthorizationUpdate = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: ['charge-authorization']
+				queryKey: ['charge-authorization-detail']
 			});
 		}
 	});
@@ -428,7 +432,7 @@ export const createMutationChargeAuthorizationDelete = () =>
 			),
 		onSuccess() {
 			queryClient.invalidateQueries({
-				queryKey: ['charge-authorization']
+				queryKey: ['charge-authorization-detail']
 			});
 		}
 	});
@@ -453,16 +457,14 @@ export const createQueryTransactionsDetail = (
 				limit: limit.toString(),
 				offset: ((page - 1) * limit).toString()
 			};
-			
+
 			if (filters.chargerId) queryParams.chargerId = filters.chargerId.toString();
 			if (filters.connectorId) queryParams.connectorId = filters.connectorId.toString();
 			if (filters.rfidTagId) queryParams.rfidTagId = filters.rfidTagId.toString();
 			if (filters.startDate) queryParams.startDate = filters.startDate.toISOString();
 			if (filters.endDate) queryParams.endDate = filters.endDate.toISOString();
-			
-			return hClient.transaction.detail
-				.$get({ query: queryParams as any })
-				.then((x) => x.json());
+
+			return hClient.transaction.detail.$get({ query: queryParams as any }).then((x) => x.json());
 		}
 	});
 

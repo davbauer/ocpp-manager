@@ -1,22 +1,81 @@
 <script lang="ts">
 	import BasePage from '$lib/components/BasePage.svelte';
 	import { createMutationChargerCreate, createQueryCharger } from '$lib/queryClient';
-	import MonitoringChargerRow from '$lib/components/MonitoringChargerRow.svelte';
-	import Scrollable from '$lib/components/Scrollable.svelte';
+	import ChargerCard from '$lib/components/ChargerCard.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import { drawerStore } from '$lib/drawerStore';
 	import { z } from 'zod';
+	import { Plug, Zap, Activity, Server, Info, Wifi, WifiOff, Bolt } from 'lucide-svelte';
+	import { Dialog } from '@ark-ui/svelte/dialog';
+	import { Portal } from '@ark-ui/svelte/portal';
 
 	import { page } from '$app/state';
 	import { PUBLIC_DEV_BACKEND_URL } from '$env/static/public';
 	import { dev } from '$app/environment';
+	import { hClient } from '$lib/hClient';
 
 	let currentPage = $state(1);
 	const pageSize = 20;
+	let showTutorial = $state(false);
 
 	const queryChargers = $derived(createQueryCharger(currentPage, pageSize, 10000));
 
+	// Fetch all connectors for all chargers
+	let allConnectors = $state<Record<number, any[]>>({});
+
+	$effect(() => {
+		const chargers = $queryChargers.data?.data || [];
+
+		// Fetch connectors for each charger
+		Promise.all(
+			chargers.map(async (charger) => {
+				try {
+					const response = await hClient.connector.charger[':id'].detail.$get({
+						param: { id: charger.id.toString() }
+					});
+					const data = await response.json();
+					return { chargerId: charger.id, connectors: data.data || [] };
+				} catch (error) {
+					console.error(`Failed to fetch connectors for charger ${charger.id}:`, error);
+					return { chargerId: charger.id, connectors: [] };
+				}
+			})
+		).then((results) => {
+			const newConnectors: Record<number, any[]> = {};
+			results.forEach(({ chargerId, connectors }) => {
+				newConnectors[chargerId] = connectors;
+			});
+			allConnectors = newConnectors;
+		});
+	});
+
 	const mutationChargerCreate = createMutationChargerCreate();
+
+	// Calculate overview stats from chargers
+	const overviewStats = $derived(() => {
+		const data = $queryChargers.data?.data || [];
+
+		let totalPower = 0;
+		Object.values(allConnectors).forEach((connectors) => {
+			connectors.forEach((connector: any) => {
+				if (connector.telemetry?.meterValue?.raw) {
+					const powerData = connector.telemetry.meterValue.raw
+						.flatMap((entry: any) => entry.sampledValue || [])
+						.find((item: any) => item.measurand === 'Power.Active.Import' && !item.phase);
+					if (powerData) {
+						totalPower += parseFloat(powerData.value) || 0;
+					}
+				}
+			});
+		});
+
+		return {
+			totalChargers: data.length,
+			online: data.filter((c) => c.connectivity === 'Online').length,
+			offline: data.filter((c) => c.connectivity === 'Offline').length,
+			totalPower: totalPower / 1000 // Convert W to kW
+		};
+	});
 
 	const openCreateDrawer = () => {
 		drawerStore.open({
@@ -65,8 +124,6 @@
 		});
 	};
 
-	let dialogTutorial: HTMLDialogElement;
-
 	const buildOCPPUrl = (shortcode: string) => {
 		const connectionURL = dev ? new URL(PUBLIC_DEV_BACKEND_URL) : page.url;
 		const protocol = connectionURL.origin.startsWith('https:') ? 'wss://' : 'ws://';
@@ -85,95 +142,214 @@
 </script>
 
 <BasePage title="Monitoring">
-	<div class="container mx-auto px-4">
-		<div class="mb-6 flex items-center justify-between">
-			<h1 class="text-2xl font-bold">Chargers</h1>
-			<div class="flex gap-x-2">
-				<div>
-					<button class="btn btn-outline" onclick={() => dialogTutorial.showModal()}
-						>Tutorial</button
-					>
-					<dialog bind:this={dialogTutorial} class="modal">
-						<div class="modal-box min-w-[50svw]">
-							<form method="dialog">
-								<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-							</form>
-							<h3 class="mb-10 text-lg font-bold">Tutorial for connecting a charging station</h3>
-							<p class="mb-4">To connect a charger using OCPP, follow the steps below:</p>
-							<ul class="mb-6 list-inside list-disc">
-								<li>
-									Determine your charger's unique identifier (referred to as <span class="font-bold"
-										>shortcode</span
-									>).
-								</li>
-								<li>
-									Use the following URL format:
-									<div
-										class="tooltip tooltip-top"
-										data-tip="Protocol depends on whether your site uses HTTP or HTTPS"
-									>
-										<code class="mt-2 block rounded-sm bg-gray-200 p-2">
-											<span class="text-blue-600">{ocppURL.protocol}</span>
-											<span class="text-green-600">{ocppURL.baseURL}</span>
-											<span class="text-purple-600">{ocppURL.path}</span>
-											<span class="text-red-600">{ocppURL.shortcode}</span>
-										</code>
+	{#snippet actions()}
+		<button class="btn btn-ghost btn-sm gap-2" onclick={() => (showTutorial = true)}>
+			<Info class="size-4" />
+			Tutorial
+		</button>
+		<button class="btn btn-primary btn-sm gap-2" onclick={openCreateDrawer}>
+			<Plug class="size-4" />
+			Add Charger
+		</button>
+	{/snippet}
+
+	<!-- Tutorial Dialog -->
+	<Dialog.Root open={showTutorial} onOpenChange={(e) => (showTutorial = e.open)}>
+		<Portal>
+			<Dialog.Backdrop class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
+			<Dialog.Positioner class="fixed inset-0 z-50 flex items-center justify-center p-4">
+				<Dialog.Content
+					class="bg-base-100 max-h-[90vh] w-full max-w-2xl overflow-auto rounded-2xl shadow-2xl"
+				>
+					<div class="p-6">
+						<Dialog.Title class="mb-4 text-2xl font-bold"
+							>Connect Your Charging Station</Dialog.Title
+						>
+						<Dialog.Description class="mb-6 text-sm opacity-70">
+							Follow these steps to connect your OCPP-compatible charger
+						</Dialog.Description>
+
+						<div class="space-y-6">
+							<div class="alert alert-info">
+								<Info class="size-5" />
+								<div>
+									<div class="font-semibold">OCPP 1.6 WebSocket Connection</div>
+									<div class="mt-1 text-xs">This manager uses OCPP 1.6 protocol over WebSocket</div>
+								</div>
+							</div>
+
+							<div class="space-y-4">
+								<div>
+									<h4 class="mb-2 flex items-center gap-2 font-semibold">
+										<span class="badge badge-primary badge-sm">1</span>
+										Create a charger shortcode
+									</h4>
+									<p class="text-sm opacity-70">
+										Choose a unique identifier for your charger (lowercase letters, numbers, and
+										dashes only)
+									</p>
+								</div>
+
+								<div>
+									<h4 class="mb-2 flex items-center gap-2 font-semibold">
+										<span class="badge badge-primary badge-sm">2</span>
+										Build the OCPP URL
+									</h4>
+									<div class="bg-base-200 space-y-2 rounded-lg p-4">
+										<div class="font-mono text-xs">
+											<span class="text-info">{ocppURL.protocol}</span>
+											<span class="text-success">{ocppURL.baseURL}</span>
+											<span class="text-secondary">{ocppURL.path}</span>
+											<span class="text-error">{ocppURL.shortcode}</span>
+										</div>
+										<p class="text-xs opacity-60">
+											Replace <code class="text-error">{ocppURL.shortcode}</code> with your charger's
+											unique identifier
+										</p>
 									</div>
-								</li>
-								<li>
-									For example, with the shortcode "<span class="font-bold">{ocppURL.shortcode}</span
-									>", the URL is:
-									<div
-										class="tooltip tooltip-right"
-										data-tip="Replace shortcode with your charger's unique identifier"
-									>
-										<code class="mt-2 block rounded-sm bg-gray-200 p-2 text-blue-600"
-											>{ocppURL.toString()}</code
-										>
+								</div>
+
+								<div>
+									<h4 class="mb-2 flex items-center gap-2 font-semibold">
+										<span class="badge badge-primary badge-sm">3</span>
+										Configure your charger
+									</h4>
+									<p class="text-sm opacity-70">
+										Enter the OCPP URL in your charger's configuration interface
+									</p>
+								</div>
+
+								<div>
+									<h4 class="mb-2 flex items-center gap-2 font-semibold">
+										<span class="badge badge-primary badge-sm">4</span>
+										Approve the connection
+									</h4>
+									<p class="text-sm opacity-70">
+										Once connected, the charger will appear in the monitoring page. You can then
+										approve it from the charger details.
+									</p>
+								</div>
+							</div>
+
+							<div class="alert">
+								<Server class="size-5" />
+								<div class="text-xs">
+									<div class="font-semibold">Authentication</div>
+									<div class="mt-1 opacity-70">
+										Username and password authentication is not currently supported
 									</div>
-								</li>
-							</ul>
-							<p class="mb-4">
-								Once the URL is used, the OCPP Manager will detect the charger automatically, and
-								you can approve the connection.
-							</p>
-							<p>If you have any questions, please open an issue in the GitHub repository.</p>
-							<p class="mt-6 text-sm font-medium">
-								PS: Username and password authentication is currently not supported.
-							</p>
+								</div>
+							</div>
 						</div>
-					</dialog>
+
+						<div class="mt-6 flex justify-end gap-2">
+							<Dialog.CloseTrigger class="btn btn-primary">Got it!</Dialog.CloseTrigger>
+						</div>
+					</div>
+				</Dialog.Content>
+			</Dialog.Positioner>
+		</Portal>
+	</Dialog.Root>
+
+	{#if $queryChargers.isPending}
+		<div class="flex flex-col items-center justify-center py-32">
+			<span class="loading loading-spinner loading-lg text-primary mb-4"></span>
+			<p class="text-sm opacity-60">Loading chargers...</p>
+		</div>
+	{:else if $queryChargers.data?.data && $queryChargers.data.data.length > 0}
+		<!-- Overview Stats -->
+		{@const stats = overviewStats()}
+		<div class="mb-8">
+			<h2 class="mb-4 flex items-center gap-2 text-lg font-bold">
+				<Activity class="size-5" />
+				System Overview
+			</h2>
+			<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+				<div class="stats border-base-300 bg-base-100 border shadow">
+					<div class="stat p-4">
+						<div class="stat-figure text-primary">
+							<Server class="size-8" />
+						</div>
+						<div class="stat-title text-xs">Total Chargers</div>
+						<div class="stat-value text-primary text-3xl">{stats.totalChargers}</div>
+						<div class="stat-desc mt-1">In system</div>
+					</div>
 				</div>
-				<button class="btn btn-primary" onclick={openCreateDrawer}>Add Charger</button>
+				<div class="stats border-base-300 bg-base-100 border shadow">
+					<div class="stat p-4">
+						<div class="stat-figure text-success">
+							<Wifi class="size-8" />
+						</div>
+						<div class="stat-title text-xs">Online</div>
+						<div class="stat-value text-success text-3xl">{stats.online}</div>
+						<div class="stat-desc mt-1">
+							{stats.totalChargers > 0
+								? Math.round((stats.online / stats.totalChargers) * 100)
+								: 0}% connected
+						</div>
+					</div>
+				</div>
+				<div class="stats border-base-300 bg-base-100 border shadow">
+					<div class="stat p-4">
+						<div class="stat-figure text-error">
+							<WifiOff class="size-8" />
+						</div>
+						<div class="stat-title text-xs">Offline</div>
+						<div class="stat-value text-error text-3xl">{stats.offline}</div>
+						<div class="stat-desc mt-1">Disconnected</div>
+					</div>
+				</div>
+				<div class="stats border-base-300 bg-base-100 border shadow">
+					<div class="stat p-4">
+						<div class="stat-figure text-warning">
+							<Bolt class="size-8" />
+						</div>
+						<div class="stat-title text-xs">Total Power</div>
+						<div class="stat-value text-warning text-3xl">{stats.totalPower.toFixed(1)}</div>
+						<div class="stat-desc mt-1">kW in use</div>
+					</div>
+				</div>
 			</div>
 		</div>
-		
-		{#if $queryChargers.isPending}
-			<div class="flex justify-center py-12">
-				<span class="loading loading-spinner loading-lg"></span>
-			</div>
-		{:else if $queryChargers.data?.data && $queryChargers.data.data.length > 0}
+
+		<!-- Chargers Grid -->
+		<div class="grid gap-6 xl:grid-cols-2">
+			{#each $queryChargers.data.data as charger (charger.id)}
+				<ChargerCard {charger} connectors={allConnectors[charger.id] || []} />
+			{/each}
+		</div>
+
+		<div class="mt-8">
 			<Pagination
-				currentPage={currentPage}
+				{currentPage}
 				totalCount={$queryChargers.data?.total_count ?? 0}
-				pageSize={pageSize}
+				{pageSize}
 				onPageChange={(newPage) => {
 					currentPage = newPage;
 				}}
-				class="mb-4"
 			/>
-
-			<Scrollable class="p-4" maxHeight="80svh">
-				<div class="space-y-6">
-					{#each $queryChargers.data.data as charger}
-						<MonitoringChargerRow {charger} />
-					{/each}
-				</div>
-			</Scrollable>
-		{:else}
-			<div class="bg-base-200 rounded-lg p-8 text-center">
-				<p class="text-base-content">No chargers found</p>
+		</div>
+	{:else}
+		<div class="flex flex-col items-center justify-center py-32">
+			<div
+				class="from-primary/20 to-secondary/20 mb-6 rounded-full bg-gradient-to-br p-8 shadow-lg"
+			>
+				<Zap class="size-24 opacity-60" />
 			</div>
-		{/if}
-	</div>
+			<h3 class="mb-2 text-2xl font-bold">No Chargers Yet</h3>
+			<p class="text-base-content/60 mb-6 max-w-md text-center">
+				Get started by adding your first charging station
+			</p>
+			<div class="flex gap-4">
+				<button class="btn btn-primary gap-2" onclick={openCreateDrawer}>
+					<Plug class="size-4" />
+					Add Your First Charger
+				</button>
+				<button class="btn btn-ghost gap-2" onclick={() => (showTutorial = true)}>
+					<Info class="size-4" />
+					How to Connect
+				</button>
+			</div>
+		</div>
+	{/if}
 </BasePage>

@@ -7,9 +7,9 @@
 	} from '$lib/queryClient';
 	import { drawerStore } from '$lib/drawerStore';
 	import { z } from 'zod';
-	import { formatDistanceToNow } from 'date-fns';
+	import { formatDistanceToNow, format } from 'date-fns';
 	import BasePage from '$lib/components/BasePage.svelte';
-	import IconDeviceAirtag from '$lib/icons/tabler/IconDeviceAirtag.svelte';
+	import { CreditCard, Edit, Plus } from 'lucide-svelte';
 	import Scrollable from '$lib/components/Scrollable.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 
@@ -133,20 +133,24 @@
 </script>
 
 <BasePage title="RFID Tags">
-	<div class="container mx-auto px-4">
-		<div class="mb-6 flex items-center justify-end">
-			<button class="btn btn-primary" onclick={openCreateDrawer}>Add RFID Tag</button>
-		</div>
+	{#snippet actions()}
+		<button class="btn btn-primary btn-sm gap-2" onclick={openCreateDrawer}>
+			<Plus class="h-4 w-4" />
+			Add RFID Tag
+		</button>
+	{/snippet}
 
+	<div class="container mx-auto px-4">
 		{#if $queryRfidTags.isPending}
-			<div class="flex justify-center py-12">
-				<span class="loading loading-spinner loading-lg"></span>
+			<div class="flex flex-col items-center justify-center py-32">
+				<span class="loading loading-spinner loading-lg text-primary mb-4"></span>
+				<p class="text-sm opacity-60">Loading RFID tags...</p>
 			</div>
 		{:else if $queryRfidTags.data?.data && $queryRfidTags.data.data.length > 0}
 			<Pagination
-				currentPage={currentPage}
+				{currentPage}
 				totalCount={$queryRfidTags.data?.total_count ?? 0}
-				pageSize={pageSize}
+				{pageSize}
 				onPageChange={(newPage) => {
 					currentPage = newPage;
 				}}
@@ -154,48 +158,79 @@
 			/>
 
 			<Scrollable class="p-4" maxHeight="80svh">
-				<div class="space-y-6">
+				<div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
 					{#each $queryRfidTags.data.data as tag}
-						<div class="bg-base-200 rounded-lg p-6 shadow-md">
-							<div class="mb-6 flex items-center justify-between">
-								<div class="flex items-center gap-4">
-									<IconDeviceAirtag class="text-primary h-10 w-10" />
-									<div>
-										<h3 class="text-xl font-semibold">{tag.friendlyName}</h3>
-										<p class="text-sm text-gray-500">RFID: {tag.rfidTag}</p>
+						<div
+							class="card bg-base-100 border-base-300 group overflow-hidden border shadow-sm transition-all hover:shadow-md"
+						>
+							<!-- Card Header -->
+							<div class="bg-base-200 px-5 py-4">
+								<div class="mb-3 flex items-center justify-between">
+									<div class="flex items-center gap-2 opacity-60">
+										<CreditCard class="h-4 w-4" />
+										<span class="text-xs font-medium uppercase tracking-wide">RFID Access tag</span>
 									</div>
+									<button
+										class="btn btn-ghost btn-xs btn-square opacity-0 transition-opacity group-hover:opacity-100"
+										onclick={() => openEditDrawer(tag)}
+									>
+										<Edit class="h-3.5 w-3.5" />
+									</button>
 								</div>
-								<button class="btn btn-ghost btn-sm" onclick={() => openEditDrawer(tag)}>
-									Edit
-								</button>
+
+								<!-- Card Number -->
+								<div class="mb-3">
+									<p class="font-mono text-lg font-semibold tracking-wide">{tag.rfidTag}</p>
+								</div>
+
+								<!-- Name -->
+								<div>
+									<p class="text-base font-medium">{tag.friendlyName}</p>
+								</div>
 							</div>
 
-							<table class="bg-base-300 table w-full overflow-hidden rounded-lg">
-								<tbody>
-									<tr>
-										<td class="w-60 font-medium">Created</td>
-										<td>{formatDistanceToNow(new Date(tag.createdAt), { addSuffix: true })}</td>
-									</tr>
+							<!-- Card Footer - Info -->
+							<div class="bg-base-100 px-5 py-4">
+								<div class="flex items-center justify-between gap-4 text-sm">
+									<div>
+										<p class="mb-0.5 text-xs opacity-50">Issued</p>
+										<p class="font-medium">
+											{format(new Date(tag.createdAt), 'MMM d, yyyy')}
+										</p>
+									</div>
+
 									{#if tag.lastTransaction}
-										<tr>
-											<td class="w-60 font-medium">Last Transaction</td>
-											<td
-												>#{tag.lastTransaction.id} -
-												{formatDistanceToNow(tag.lastTransaction.createdAt, {
+										<div class="text-right">
+											<p class="mb-0.5 text-xs opacity-50">Last Used</p>
+											<p class="font-medium">
+												{formatDistanceToNow(new Date(tag.lastTransaction.createdAt), {
 													addSuffix: true
-												})}</td
-											>
-										</tr>
+												})}
+											</p>
+										</div>
+									{:else}
+										<div class="text-right">
+											<p class="mb-0.5 text-xs opacity-50">Status</p>
+											<p class="font-medium opacity-60">Unused</p>
+										</div>
 									{/if}
-								</tbody>
-							</table>
+								</div>
+							</div>
 						</div>
 					{/each}
 				</div>
 			</Scrollable>
 		{:else}
-			<div class="bg-base-200 rounded-lg p-8 text-center">
-				<p class="text-base-content">No RFID Tags Found</p>
+			<div class="flex flex-col items-center justify-center py-32">
+				<div class="bg-base-200 mb-6 rounded-2xl p-8">
+					<CreditCard class="size-24 opacity-40" />
+				</div>
+				<h3 class="mb-2 text-2xl font-bold">No RFID Tags Found</h3>
+				<p class="text-base-content/60 mb-6">Create your first RFID tag to get started</p>
+				<button class="btn btn-primary gap-2" onclick={() => openCreateDrawer()}>
+					<Plus class="h-4 w-4" />
+					Add RFID Tag
+				</button>
 			</div>
 		{/if}
 	</div>
