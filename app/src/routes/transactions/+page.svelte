@@ -7,7 +7,7 @@
 	} from '$lib/queryClient';
 
 	import BasePage from '$lib/components/BasePage.svelte';
-	import { formatDuration, intervalToDuration } from 'date-fns';
+	import { formatDuration, intervalToDuration, subDays } from 'date-fns';
 	import Pikaday from 'pikaday';
 	import Papa from 'papaparse';
 	import { page } from '$app/stores';
@@ -238,6 +238,40 @@
 		goto('/transactions', { replaceState: true, noScroll: true });
 	}
 
+	function setDatePreset(preset: 'today' | 'last24h' | 'last7d' | 'last30d') {
+		const now = new Date();
+		const tomorrow = subDays(now, -1);
+		const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+		switch (preset) {
+			case 'today':
+			case 'last24h':
+				// Both mean today since filtering is day-based
+				draftStartDate = formatDate(now);
+				draftEndDate = formatDate(tomorrow);
+				break;
+			case 'last7d':
+				draftStartDate = formatDate(subDays(now, 6)); // 7 days including today
+				draftEndDate = formatDate(tomorrow);
+				break;
+			case 'last30d':
+				draftStartDate = formatDate(subDays(now, 29)); // 30 days including today
+				draftEndDate = formatDate(tomorrow);
+				break;
+		}
+
+		// Automatically apply filters after setting preset
+		selectedChargerId = draftChargerId;
+		selectedConnectorId = draftConnectorId;
+		selectedRfidTagId = draftRfidTagId;
+		startDate = draftStartDate;
+		endDate = draftEndDate;
+		currentPage = 1;
+		allLoadedTransactions = [];
+		lastProcessedPage = 0;
+		updateURL();
+	}
+
 	async function exportToCSV() {
 		const loadingToast = toast.loading('Exporting transactions...');
 		try {
@@ -265,7 +299,7 @@
 				'Created At': t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A',
 				'Start Time': t.startTime ? new Date(t.startTime).toLocaleString() : 'N/A',
 				'End Time': t.stopTime ? new Date(t.stopTime).toLocaleString() : 'Ongoing',
-				'Duration': t.stopTime ? getFormattedDuration(t.startTime, t.stopTime) : 'Ongoing',
+				Duration: t.stopTime ? getFormattedDuration(t.startTime, t.stopTime) : 'Ongoing',
 				'Current Status': t.stopTime ? 'Completed' : 'Active',
 				'Transaction Status': t.status || 'N/A',
 				'Charger Name': t.chargeAuthorization?.charger?.friendlyName || 'Unknown',
@@ -461,6 +495,23 @@
 							bind:value={draftEndDate}
 							placeholder="YYYY-MM-DD"
 						/>
+					</div>
+
+					<div class="form-control">
+						<div class="label py-1">
+							<span class="label-text text-xs font-medium">Quick Date</span>
+						</div>
+						<div class="btn-group">
+							<button type="button" class="btn btn-sm" onclick={() => setDatePreset('today')}>
+								1d
+							</button>
+							<button type="button" class="btn btn-sm" onclick={() => setDatePreset('last7d')}>
+								7d
+							</button>
+							<button type="button" class="btn btn-sm" onclick={() => setDatePreset('last30d')}>
+								30d
+							</button>
+						</div>
 					</div>
 
 					<div class="flex gap-2">
