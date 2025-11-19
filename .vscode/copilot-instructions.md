@@ -1,29 +1,30 @@
-# Project Coding Guidelines
-
-You are working in a large, growing codebase. Follow these rules at all times:
+# Project Coding Guidelines (Strict)
 
 ## Structure & Design
 
-- Split code by clear concerns; keep functions, classes, and modules focused and composable.
-- Match the existing project structure and naming conventions.
+- Split by concern; keep functions, classes, modules focused.
+- Follow existing structure, naming, and patterns.
+- **Use ArkUI first**, then DaisyUI, then Tailwind.
+- Check **MCP server** for availability before adding components.
 
 ## Naming
 
-- Use clear, self-explanatory names for functions, classes, and variables.
-- Names can be slightly longer if needed to convey meaning, but avoid verbosity.
+- Clear, self-explanatory names; slightly longer is fine.
+- Be consistent with project conventions and UI frameworks.
 
 ## Code Quality
 
-- Never leave dead code, unused functions, or unused imports.
-- Only add comments for non-obvious logic.
-- Avoid redundant checks, trial-and-error scaffolding, or placeholders.
+- No dead code, unused imports, or scaffolding.
+- Comment only non-obvious logic.
+- **Support dark/light mode**; avoid hardcoded colors.
 
-## Implementation Style
+## Implementation
 
-- Write concise, efficient, and robust solutions.
-- Prefer single, clean implementations over multiple alternatives.
-- Follow the style and patterns of the existing codebase exactly.
+- Concise, robust, single clean solutions.
+- Combine UI frameworks carefully; maintain consistency.
+- Prefer theme tokens/variables for styles.
 
 ## Safety & Reliability
 
-- Code should be safe, predictable, and easy to understand.
+- Code must be predictable and readable.
+- **File changes:** use `_temp` versions first, then replace originals.
