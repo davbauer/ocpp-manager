@@ -24,9 +24,14 @@ OCPP Manager is an application built with [HonoJS](https://hono.dev/) for the ba
 
 ### Features:
 
-- **Charging Station Management**: Add and monitor charging stations and their associated connectors.
-- **RFID Card Setup**: Manage RFID cards, including setting up expiring authorizations to allow or restrict charging.
-- **Transaction Records**: Track all transactions and estimate ongoing transaction details.
+- **Charging Station Management**: Add and monitor charging stations and their associated connectors in real-time.
+- **RFID Card Setup**: Manage RFID cards with friendly names and set up expiring or permanent authorizations.
+- **Charge Authorization Control**: Fine-grained access control - assign specific chargers to RFID cards, with optional expiry dates.
+- **Transaction Records**: Track all charging sessions with detailed energy consumption, duration, and cost estimates.
+- **CSV Export**: Export transaction data to CSV format for accounting, billing, or analysis purposes.
+- **Real-time Monitoring**: Live updates on charger status, connector availability, and ongoing transactions.
+- **Administration Tools**: Configure system settings and manage application-wide preferences.
+- **Comprehensive Logging**: Built-in logging system for troubleshooting and audit trails.
 
 ## Docker Compose Example
 
@@ -98,6 +103,20 @@ _Your charger is now connected!_
 
 ### How to Use Authorization
 
+The authorization system allows you to control which RFID cards can access which charging stations, with optional expiry dates for time-limited access.
+
+**Managing RFID Tags:**
+- Navigate to the "RFID Tags" page to view all registered cards
+- Edit tags to update friendly names
+- View when each tag was issued and last used
+
+**Setting Up Charge Authorizations:**
+- Go to the "Charge Authorizations" page
+- Tags are grouped by card for easy management
+- Add charger access for each RFID tag individually
+- Set optional expiry dates for temporary access
+- Edit or remove access at any time
+
 #### Anonymous Charging
 
 Start charging. It will fail the first time, and a virtual RFID tag will appear in the RFID tag tab.
@@ -114,9 +133,17 @@ Assign the tag to a charge authorization, and you're ready to go!
 
 #### Transactions
 
-While transactions are running, they will be estimated in real-time.
+While transactions are running, they will be estimated in real-time based on meter values.
 
-Once completed or aborted, the charger will update the transaction with the actual details.
+Once completed or aborted, the charger will update the transaction with the actual energy consumption and final details.
+
+**Transaction Features:**
+- View all transactions with filtering by charger, connector, RFID tag, and date range
+- Export filtered transactions to CSV for billing or analysis
+- Real-time energy consumption estimates for active charging sessions
+- Detailed meter readings (start/stop values in Wh)
+- Duration tracking and payment status
+- Delete transactions with confirmation prompts
 
 ## Development Setup
 
