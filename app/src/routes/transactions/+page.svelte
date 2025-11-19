@@ -239,9 +239,9 @@
 	}
 
 	async function exportToCSV() {
+		const loadingToast = toast.loading('Exporting transactions...');
 		try {
 			isExporting = true;
-			toast.loading('Exporting transactions...');
 
 			const params = new URLSearchParams();
 			params.set('limit', '1000000');
@@ -256,20 +256,25 @@
 			const data = await response.json();
 
 			if (!data.data || data.data.length === 0) {
-				toast.error('No transactions to export');
+				toast.error('No transactions to export', { id: loadingToast });
 				return;
 			}
 
 			const csvData = data.data.map((t: any) => ({
 				'Transaction ID': t.id,
-				Charger: t.chargeAuthorization?.charger?.friendlyName || 'Unknown',
-				'Charger ID': t.chargeAuthorization?.charger?.chargerId || 'N/A',
-				'Connector ID': t.connector?.connectorId || 'N/A',
-				'RFID Tag': t.chargeAuthorization?.tag?.friendlyName || 'Unknown',
-				'RFID Tag Number': t.chargeAuthorization?.tag?.rfidTag || 'N/A',
+				'Created At': t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A',
 				'Start Time': t.startTime ? new Date(t.startTime).toLocaleString() : 'N/A',
 				'End Time': t.stopTime ? new Date(t.stopTime).toLocaleString() : 'Ongoing',
-				Duration: t.stopTime ? getFormattedDuration(t.startTime, t.stopTime) : 'Ongoing',
+				'Duration': t.stopTime ? getFormattedDuration(t.startTime, t.stopTime) : 'Ongoing',
+				'Current Status': t.stopTime ? 'Completed' : 'Active',
+				'Transaction Status': t.status || 'N/A',
+				'Charger Name': t.chargeAuthorization?.charger?.friendlyName || 'Unknown',
+				'Charger Shortcode': t.chargeAuthorization?.charger?.shortcode || 'N/A',
+				'Charger Vendor': t.chargeAuthorization?.charger?.vendor || 'N/A',
+				'Charger Model': t.chargeAuthorization?.charger?.model || 'N/A',
+				'Connector ID': t.connector?.connectorId || 'N/A',
+				'RFID Tag Name': t.chargeAuthorization?.tag?.friendlyName || 'Unknown',
+				'RFID Tag Number': t.chargeAuthorization?.tag?.rfidTag || 'N/A',
 				'Meter Start (Wh)': t.meterStart || 0,
 				'Meter Stop (Wh)': t.meterStop || 'N/A',
 				'Energy Delivered (Wh)': t.energyDelivered || 0,
@@ -281,10 +286,7 @@
 					? (t.estimatedEnergyDelivered.totalEnergyDelivered / 1000).toFixed(2)
 					: 'N/A',
 				'Stop Reason': t.reason || 'N/A',
-				'Payment Status': t.paymentStatus || 'N/A',
-				'Transaction Status': t.status || 'N/A',
-				Status: t.stopTime ? 'Completed' : 'Active',
-				'Created At': t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A'
+				'Payment Status': t.paymentStatus || 'N/A'
 			}));
 
 			const csv = Papa.unparse(csvData);
@@ -299,10 +301,10 @@
 			link.click();
 			document.body.removeChild(link);
 
-			toast.success(`Exported ${data.data.length} transactions`);
+			toast.success(`Exported ${data.data.length} transactions`, { id: loadingToast });
 		} catch (error) {
 			console.error('Export error:', error);
-			toast.error('Failed to export transactions');
+			toast.error('Failed to export transactions', { id: loadingToast });
 		} finally {
 			isExporting = false;
 		}
