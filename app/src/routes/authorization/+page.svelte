@@ -198,7 +198,7 @@
 							<div class="bg-base-200 px-5 py-4">
 								<div class="mb-3 flex items-center gap-2 opacity-60">
 									<CreditCard class="h-4 w-4" />
-									<span class="text-xs font-medium uppercase tracking-wide">RFID Access Card</span>
+									<span class="text-xs font-medium uppercase tracking-wide">RFID Access Tag</span>
 								</div>
 
 								<!-- Card Number -->

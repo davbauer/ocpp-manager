@@ -305,7 +305,7 @@
 							<Bolt class="size-8" />
 						</div>
 						<div class="stat-title text-xs">Total Power</div>
-						<div class="stat-value text-warning text-3xl">{stats.totalPower.toFixed(1)}</div>
+						<div class="stat-value text-warning text-3xl">{stats.totalPower.toFixed(2)}</div>
 						<div class="stat-desc mt-1">kW in use</div>
 					</div>
 				</div>

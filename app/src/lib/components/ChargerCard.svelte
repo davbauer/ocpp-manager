@@ -353,7 +353,7 @@
 					</div>
 					<div class="flex items-center gap-1.5">
 						<div class="text-warning font-bold">
-							{s.totalPower > 0 ? `${(s.totalPower / 1000).toFixed(1)}` : '0'}
+							{s.totalPower > 0 ? `${(s.totalPower / 1000).toFixed(2)}` : '0.00'}
 						</div>
 						<div class="opacity-60">kW</div>
 					</div>
