@@ -18,6 +18,7 @@ export * from './RemoteStartTransaction';
 export * from './RemoteStopTransaction';
 export * from './ReserveNow';
 export * from './Reset';
+export * from './SecurityEventNotification';
 export * from './SendLocalList';
 export * from './SetChargingProfile';
 export * from './StartTransaction';

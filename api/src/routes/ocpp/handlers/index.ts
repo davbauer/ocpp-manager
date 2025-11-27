@@ -3,6 +3,7 @@ import { authorize } from "./authorize";
 import { bootNotification } from "./bootNotification";
 import { heartbeat } from "./heartbeat";
 import { statusNotification } from "./statusNotification";
+import { securityEventNotification } from "./securityEventNotification";
 import { CallResultSchema, CallSchema } from "../types";
 import type { WSCustomContext } from "../WSCustomContext";
 import type { z } from "zod";
@@ -57,6 +58,13 @@ export const handler = async (
 
       case "StopTransaction":
         responsePayload = await stopTransaction.handleRequest(payload, wsCtx);
+        break;
+
+      case "SecurityEventNotification":
+        responsePayload = await securityEventNotification.handleRequest(
+          payload,
+          wsCtx
+        );
         break;
 
       default:

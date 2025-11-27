@@ -27244,6 +27244,17 @@ var ResetResponseSchema = z.object({
   status: z.nativeEnum(ResetStatusEnum)
 });
 
+// src/routes/ocpp/types/1.6/Messages/SecurityEventNotification.ts
+var SecurityEventNotificationRequestSchema = z.object({
+  /** Type of the security event. This is a CiString50 containing the security event type. */
+  type: CiString50Type,
+  /** Date and time at which the event occurred. */
+  timestamp: z.string().datetime({ offset: true }),
+  /** Additional information about the occurred security event. Optional. */
+  techInfo: CiString255Type.nullish()
+});
+var SecurityEventNotificationResponseSchema = z.object({});
+
 // src/routes/ocpp/types/1.6/Types/UpdateType.ts
 var UpdateTypeEnum = {
   Differential: "Differential",
@@ -27447,6 +27458,7 @@ var ActionEnum = {
   RemoteStopTransaction: "RemoteStopTransaction",
   ReserveNow: "ReserveNow",
   Reset: "Reset",
+  SecurityEventNotification: "SecurityEventNotification",
   SendLocalList: "SendLocalList",
   SetChargingProfile: "SetChargingProfile",
   StartTransaction: "StartTransaction",
@@ -41246,7 +41258,13 @@ function generateBaseModel(table, primaryKey, updatedAtField) {
      * Finds multiple records based on the provided expression builder and limit.
      */
     static async findMany(options = {}, trx) {
-      const records = await (trx ?? db).selectFrom(this.tableName).$if(!!options.eb, (qb) => qb.where(options.eb)).$if(!!options.limit, (qb) => qb.limit(options.limit)).$if(!!options.offset, (qb) => qb.offset(options.offset)).selectAll().execute();
+      const records = await (trx ?? db).selectFrom(this.tableName).$if(!!options.eb, (qb) => qb.where(options.eb)).$if(
+        !!options.orderBy,
+        (qb) => qb.orderBy(
+          options.orderBy.column,
+          options.orderBy.direction ?? "asc"
+        )
+      ).$if(!!options.limit, (qb) => qb.limit(options.limit)).$if(!!options.offset, (qb) => qb.offset(options.offset)).selectAll().execute();
       return records.map(
         (record) => new this(record)
       );
@@ -41320,14 +41338,14 @@ var ChargeAuthorization = class extends generateBaseModel(
       Charger.findOneOrThrow({
         eb: (eb) => eb("id", "=", this.chargerId)
       }),
-      RfidTag.findOneOrThrow({
+      this.rfidTagId ? RfidTag.findOneOrThrow({
         eb: (eb) => eb("id", "=", this.rfidTagId)
-      })
+      }) : null
     ]);
     return {
       ...this.serialize(),
       charger: charger2.serialize(),
-      tag: tag.serialize()
+      tag: tag ? tag.serialize() : null
     };
   }
 };
@@ -41421,31 +41439,45 @@ var Transaction2 = class extends generateBaseModel("transaction", "id") {
       }),
       Connector.findOne({
         eb: (eb) => eb("id", "=", this.connectorId)
-      }),
-      db.selectFrom("telemetry").select([
-        sql`
-        ROUND(MAX(
-          TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
-            telemetry.meter_value::jsonb,
-            '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").value'
-          )::TEXT)::NUMERIC
-        ) -
-        MIN(
-          TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
-            telemetry.meter_value::jsonb,
-            '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").value'
-          )::TEXT)::NUMERIC
-          ))
-      `.as("totalEnergyDelivered"),
-        sql`MAX(telemetry.created_at)`.as("lastUpdateTimestamp")
-      ]).where("transactionId", "=", this.id).where(
-        sql`
-        JSONB_PATH_QUERY_FIRST(
-          telemetry.meter_value::jsonb,
-          '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").value'
-        ) IS NOT NULL
-      `
-      ).executeTakeFirst()
+      }).then((x) => x?.serialize()),
+      db.with(
+        "energy_samples",
+        (db2) => db2.selectFrom("telemetry").select([
+          sql`
+              (
+                TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
+                  telemetry.meter_value::jsonb,
+                  '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").value'
+                )::TEXT)::NUMERIC
+                *
+                CASE
+                  WHEN COALESCE(TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
+                    telemetry.meter_value::jsonb,
+                    '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").unit'
+                  )::TEXT), 'Wh') = 'kWh' THEN 1000
+                  WHEN COALESCE(TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
+                    telemetry.meter_value::jsonb,
+                    '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").unit'
+                  )::TEXT), 'Wh') = 'MWh' THEN 1000000
+                  ELSE 1
+                END
+              )
+            `.as("value_wh"),
+          sql`telemetry.created_at`.as("created_at")
+        ]).where("transactionId", "=", this.id).where(
+          sql`
+              JSONB_PATH_EXISTS(
+                telemetry.meter_value::jsonb,
+                '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register")'
+              )
+            `
+        )
+      ).selectFrom("energy_samples").select([
+        sql`MAX(value_wh) - MIN(value_wh)`.as(
+          "totalEnergyDelivered"
+        ),
+        sql`MAX(created_at)`.as("lastUpdateTimestamp")
+      ]).executeTakeFirst()
     ]);
     return {
       ...this.serialize(),
@@ -41574,6 +41606,21 @@ var statusNotification = {
         status
       });
     }
+    return {};
+  }
+};
+
+// src/routes/ocpp/handlers/securityEventNotification.ts
+var securityEventNotification = {
+  handleRequest: async (payload, wsCtx) => {
+    const parsed = SecurityEventNotificationRequestSchema.parse(payload);
+    const charger2 = wsCtx.get("charger");
+    logger.info("SecurityEventNotification received", {
+      shortcode: charger2.shortcode,
+      eventType: parsed.type,
+      timestamp: parsed.timestamp,
+      techInfo: parsed.techInfo ?? void 0
+    });
     return {};
   }
 };
@@ -41732,6 +41779,12 @@ var handler = async (message, wsCtx) => {
       case "StopTransaction":
         responsePayload = await stopTransaction.handleRequest(payload, wsCtx);
         break;
+      case "SecurityEventNotification":
+        responsePayload = await securityEventNotification.handleRequest(
+          payload,
+          wsCtx
+        );
+        break;
       default:
         throw new Error(`Unknown action: ${action}`);
     }
@@ -41870,7 +41923,49 @@ var OCPPWebsocketManager = class {
         const [messageType, messageId] = parsedMessage;
         switch (messageType) {
           case 2: {
-            const parsed = CallSchema.parse(parsedMessage);
+            const parseResult = CallSchema.safeParse(parsedMessage);
+            if (!parseResult.success) {
+              const [, messageId2, action] = parsedMessage;
+              const actionError = parseResult.error.issues.find(
+                (issue) => issue.code === "invalid_enum_value" && issue.path[0] === 2
+              );
+              if (actionError) {
+                logger.warn("Received unsupported OCPP action", {
+                  shortcode,
+                  action,
+                  messageId: messageId2
+                });
+                const callError2 = [
+                  4,
+                  messageId2,
+                  ErrorCodeEnum.NotSupported,
+                  `Action '${action}' is not supported`,
+                  {}
+                ];
+                this.sendMessage({
+                  rawMessage: JSON.stringify(callError2),
+                  shortcode
+                });
+                return;
+              }
+              logger.error("Invalid Call message format", {
+                shortcode,
+                error: parseResult.error.message
+              });
+              const callError = [
+                4,
+                messageId2 || "unknown",
+                ErrorCodeEnum.FormationViolation,
+                "Invalid message format",
+                {}
+              ];
+              this.sendMessage({
+                rawMessage: JSON.stringify(callError),
+                shortcode
+              });
+              return;
+            }
+            const parsed = parseResult.data;
             logger.info("incoming request (type 2)", { shortcode, message });
             const messageResponse = await handler(parsed, connection.wsCtx);
             if (messageResponse) {
@@ -41920,7 +42015,9 @@ var OCPPWebsocketManager = class {
         shortcode,
         error: error instanceof Error ? error.message : String(error)
       });
-      throw error;
+      if (error instanceof ZodError) {
+        return;
+      }
     }
   }
   async updateWsCtx(shortcode) {
@@ -42471,7 +42568,11 @@ var charger = new Hono2().get(
     const settings = await Setting.findOneOrThrow();
     const heartbeatIntervalWithBuffer = settings.heartbeatInterval + 10;
     const [chargers, totalCount] = await Promise.all([
-      Charger.findMany({ limit, offset }),
+      Charger.findMany({
+        limit,
+        offset,
+        orderBy: { column: "createdAt", direction: "asc" }
+      }),
       Charger.count()
     ]);
     const chargersWithConnectivity = chargers.map((charger2) => {
@@ -42632,7 +42733,11 @@ var chargeAuthorization = new Hono2().get(
   async (c) => {
     const { limit, offset } = c.req.valid("query");
     const [authorizations, totalCount] = await Promise.all([
-      ChargeAuthorization.findMany({ limit, offset }),
+      ChargeAuthorization.findMany({
+        limit,
+        offset,
+        orderBy: { column: "createdAt", direction: "asc" }
+      }),
       ChargeAuthorization.count()
     ]);
     return successResponse(
@@ -42654,7 +42759,11 @@ var chargeAuthorization = new Hono2().get(
   async (c) => {
     const { limit, offset } = c.req.valid("query");
     const [authorizations, totalCount] = await Promise.all([
-      ChargeAuthorization.findMany({ limit, offset }),
+      ChargeAuthorization.findMany({
+        limit,
+        offset,
+        orderBy: { column: "createdAt", direction: "asc" }
+      }),
       ChargeAuthorization.count()
     ]);
     return successResponse(
@@ -42991,12 +43100,16 @@ var transaction = new Hono2().get(
   async (c) => {
     const { limit, offset } = c.req.valid("query");
     const [transactions, totalCount] = await Promise.all([
-      Transaction2.findMany({ limit, offset }),
+      Transaction2.findMany({
+        limit,
+        offset,
+        orderBy: { column: "id", direction: "desc" }
+      }),
       Transaction2.count()
     ]);
     return successResponse(
       c,
-      transactions.reverse().map((transaction2) => transaction2.serialize()),
+      transactions.map((transaction2) => transaction2.serialize()),
       "Transactions retrieved successfully",
       totalCount
     );
@@ -43007,19 +43120,67 @@ var transaction = new Hono2().get(
     "query",
     z.object({
       limit: z.coerce.number().optional(),
-      offset: z.coerce.number().optional()
+      offset: z.coerce.number().optional(),
+      chargerId: z.coerce.number().optional(),
+      connectorId: z.coerce.number().optional(),
+      rfidTagId: z.coerce.number().optional(),
+      startDate: z.coerce.date().optional(),
+      endDate: z.coerce.date().optional()
     })
   ),
   async (c) => {
-    const { limit, offset } = c.req.valid("query");
+    const {
+      limit,
+      offset,
+      chargerId,
+      connectorId,
+      rfidTagId,
+      startDate,
+      endDate
+    } = c.req.valid("query");
+    const filters = [];
+    if (connectorId) {
+      filters.push((eb) => eb("connectorId", "=", connectorId));
+    } else if (chargerId) {
+      const chargers = await Connector.findMany({
+        eb: (eb) => eb("chargerId", "=", chargerId)
+      });
+      const connectorIds = chargers.map((c2) => c2.serialize().id);
+      if (connectorIds.length > 0) {
+        filters.push((eb) => eb("connectorId", "in", connectorIds));
+      }
+    }
+    if (rfidTagId) {
+      filters.push(
+        (eb) => eb(
+          "chargeAuthorizationId",
+          "in",
+          eb.selectFrom("ChargeAuthorization").select("id").where("rfidTagId", "=", rfidTagId)
+        )
+      );
+    }
+    if (startDate) {
+      filters.push(
+        (eb) => eb("startTime", ">=", startDate.toISOString())
+      );
+    }
+    if (endDate) {
+      filters.push((eb) => eb("startTime", "<=", endDate.toISOString()));
+    }
+    const filterFn = filters.length > 0 ? (eb) => eb.and(filters.map((f) => f(eb))) : void 0;
     const [transactions, totalCount] = await Promise.all([
-      Transaction2.findMany({ limit, offset }),
-      Transaction2.count()
+      Transaction2.findMany({
+        eb: filterFn,
+        limit,
+        offset,
+        orderBy: { column: "id", direction: "desc" }
+      }),
+      Transaction2.count({ eb: filterFn })
     ]);
     return successResponse(
       c,
       await Promise.all(
-        transactions.reverse().map((transaction2) => transaction2.getFullDetail())
+        transactions.map((transaction2) => transaction2.getFullDetail())
       ),
       "Transaction details retrieved successfully",
       totalCount

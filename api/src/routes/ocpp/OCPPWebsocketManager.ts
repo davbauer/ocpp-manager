@@ -1,11 +1,12 @@
 import { logger } from "../../lib/globals/logger";
-import { z } from "zod";
+import { z, ZodError } from "zod";
 import {
   ActionEnum,
   CallErrorSchema,
   CallResultSchema,
   CallSchema,
   createCallResultSchema,
+  ErrorCodeEnum,
 } from "./types";
 import { WSCustomContext } from "./WSCustomContext";
 import type { WSContext } from "hono/ws";
@@ -180,7 +181,69 @@ class OCPPWebsocketManager {
 
         switch (messageType) {
           case 2: {
-            const parsed = CallSchema.parse(parsedMessage);
+            // Try to parse the Call message with schema validation
+            const parseResult = CallSchema.safeParse(parsedMessage);
+
+            if (!parseResult.success) {
+              // Schema validation failed - likely an unknown/unsupported action
+              const [, messageId, action] = parsedMessage as [
+                number,
+                string,
+                string,
+                unknown
+              ];
+
+              // Check if this is specifically an unknown action error
+              const actionError = parseResult.error.issues.find(
+                (issue) =>
+                  issue.code === "invalid_enum_value" && issue.path[0] === 2
+              );
+
+              if (actionError) {
+                logger.warn("Received unsupported OCPP action", {
+                  shortcode,
+                  action,
+                  messageId,
+                });
+
+                // Send CallError with NotSupported error code
+                const callError: [number, string, string, string, object] = [
+                  4,
+                  messageId,
+                  ErrorCodeEnum.NotSupported,
+                  `Action '${action}' is not supported`,
+                  {},
+                ];
+
+                this.sendMessage({
+                  rawMessage: JSON.stringify(callError),
+                  shortcode,
+                });
+                return;
+              }
+
+              // Other validation errors
+              logger.error("Invalid Call message format", {
+                shortcode,
+                error: parseResult.error.message,
+              });
+
+              const callError: [number, string, string, string, object] = [
+                4,
+                messageId || "unknown",
+                ErrorCodeEnum.FormationViolation,
+                "Invalid message format",
+                {},
+              ];
+
+              this.sendMessage({
+                rawMessage: JSON.stringify(callError),
+                shortcode,
+              });
+              return;
+            }
+
+            const parsed = parseResult.data;
             logger.info("incoming request (type 2)", { shortcode, message });
             const messageResponse = await handler(parsed, connection.wsCtx);
             if (messageResponse) {
@@ -233,7 +296,18 @@ class OCPPWebsocketManager {
         shortcode,
         error: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+
+      // Don't re-throw errors from message handling - log them but keep the connection alive
+      // The error has already been logged, and re-throwing would crash the server
+      // For ZodError or other validation errors, we've already sent an appropriate CallError
+      if (error instanceof ZodError) {
+        // Validation errors are already handled above for Call messages
+        // This catch is for any ZodError that slips through (e.g., from handlers)
+        return;
+      }
+
+      // For other errors, we should not crash the entire server
+      // The connection will stay alive and can continue processing other messages
     }
   }
 
