@@ -41565,6 +41565,49 @@ var bootNotification = {
   }
 };
 
+// src/routes/ocpp/handlers/dataTransfer.ts
+var dataTransfer = {
+  handleRequest: async (payload, wsCtx) => {
+    const parsed = DataTransferRequestSchema.parse(payload);
+    const charger2 = wsCtx.get("charger");
+    logger.info("DataTransfer received", {
+      shortcode: charger2.shortcode,
+      vendorId: parsed.vendorId,
+      messageId: parsed.messageId ?? void 0,
+      dataLength: parsed.data?.length ?? 0
+    });
+    return {
+      status: DataTransferStatusEnum.UnknownVendorId
+    };
+  }
+};
+
+// src/routes/ocpp/handlers/diagnosticsStatusNotification.ts
+var diagnosticsStatusNotification = {
+  handleRequest: async (payload, wsCtx) => {
+    const parsed = DiagnosticsStatusNotificationRequestSchema.parse(payload);
+    const charger2 = wsCtx.get("charger");
+    logger.info("DiagnosticsStatusNotification received", {
+      shortcode: charger2.shortcode,
+      status: parsed.status
+    });
+    return {};
+  }
+};
+
+// src/routes/ocpp/handlers/firmwareStatusNotification.ts
+var firmwareStatusNotification = {
+  handleRequest: async (payload, wsCtx) => {
+    const parsed = FirmwareStatusNotificationRequestSchema.parse(payload);
+    const charger2 = wsCtx.get("charger");
+    logger.info("FirmwareStatusNotification received", {
+      shortcode: charger2.shortcode,
+      status: parsed.status
+    });
+    return {};
+  }
+};
+
 // src/routes/ocpp/handlers/heartbeat.ts
 var heartbeat = {
   handleRequest: async (payload, wsCtx) => {
@@ -41575,53 +41618,6 @@ var heartbeat = {
       lastHeartbeat: currentTime
     });
     return { currentTime };
-  }
-};
-
-// src/routes/ocpp/handlers/statusNotification.ts
-var statusNotification = {
-  handleRequest: async (payload, wsCtx) => {
-    const { connectorId, status } = StatusNotificationRequestSchema.parse(payload);
-    const charger2 = wsCtx.get("charger");
-    if (connectorId === 0) {
-      await charger2.update({
-        lastHeartbeat: /* @__PURE__ */ new Date()
-      });
-      return {};
-    }
-    let connector2 = await Connector.findOne({
-      eb: (eb) => eb.and([
-        eb("chargerId", "=", charger2.id),
-        eb("connectorId", "=", connectorId)
-      ])
-    });
-    if (!connector2) {
-      connector2 = await Connector.insert({
-        chargerId: charger2.id,
-        connectorId,
-        status
-      });
-    } else {
-      await connector2.update({
-        status
-      });
-    }
-    return {};
-  }
-};
-
-// src/routes/ocpp/handlers/securityEventNotification.ts
-var securityEventNotification = {
-  handleRequest: async (payload, wsCtx) => {
-    const parsed = SecurityEventNotificationRequestSchema.parse(payload);
-    const charger2 = wsCtx.get("charger");
-    logger.info("SecurityEventNotification received", {
-      shortcode: charger2.shortcode,
-      eventType: parsed.type,
-      timestamp: parsed.timestamp,
-      techInfo: parsed.techInfo ?? void 0
-    });
-    return {};
   }
 };
 
@@ -41654,6 +41650,21 @@ var meterValues = {
       meterValue: {
         raw: meterValue
       }
+    });
+    return {};
+  }
+};
+
+// src/routes/ocpp/handlers/securityEventNotification.ts
+var securityEventNotification = {
+  handleRequest: async (payload, wsCtx) => {
+    const parsed = SecurityEventNotificationRequestSchema.parse(payload);
+    const charger2 = wsCtx.get("charger");
+    logger.info("SecurityEventNotification received", {
+      shortcode: charger2.shortcode,
+      eventType: parsed.type,
+      timestamp: parsed.timestamp,
+      techInfo: parsed.techInfo ?? void 0
     });
     return {};
   }
@@ -41701,6 +41712,38 @@ var startTransaction = {
       idTagInfo,
       transactionId: transaction2.id
     };
+  }
+};
+
+// src/routes/ocpp/handlers/statusNotification.ts
+var statusNotification = {
+  handleRequest: async (payload, wsCtx) => {
+    const { connectorId, status } = StatusNotificationRequestSchema.parse(payload);
+    const charger2 = wsCtx.get("charger");
+    if (connectorId === 0) {
+      await charger2.update({
+        lastHeartbeat: /* @__PURE__ */ new Date()
+      });
+      return {};
+    }
+    let connector2 = await Connector.findOne({
+      eb: (eb) => eb.and([
+        eb("chargerId", "=", charger2.id),
+        eb("connectorId", "=", connectorId)
+      ])
+    });
+    if (!connector2) {
+      connector2 = await Connector.insert({
+        chargerId: charger2.id,
+        connectorId,
+        status
+      });
+    } else {
+      await connector2.update({
+        status
+      });
+    }
+    return {};
   }
 };
 
@@ -41761,8 +41804,35 @@ var handler = async (message, wsCtx) => {
       case "BootNotification":
         responsePayload = await bootNotification.handleRequest(payload, wsCtx);
         break;
+      case "DataTransfer":
+        responsePayload = await dataTransfer.handleRequest(payload, wsCtx);
+        break;
+      case "DiagnosticsStatusNotification":
+        responsePayload = await diagnosticsStatusNotification.handleRequest(
+          payload,
+          wsCtx
+        );
+        break;
+      case "FirmwareStatusNotification":
+        responsePayload = await firmwareStatusNotification.handleRequest(
+          payload,
+          wsCtx
+        );
+        break;
       case "Heartbeat":
         responsePayload = await heartbeat.handleRequest(payload, wsCtx);
+        break;
+      case "MeterValues":
+        responsePayload = await meterValues.handleRequest(payload, wsCtx);
+        break;
+      case "SecurityEventNotification":
+        responsePayload = await securityEventNotification.handleRequest(
+          payload,
+          wsCtx
+        );
+        break;
+      case "StartTransaction":
+        responsePayload = await startTransaction.handleRequest(payload, wsCtx);
         break;
       case "StatusNotification":
         responsePayload = await statusNotification.handleRequest(
@@ -41770,20 +41840,8 @@ var handler = async (message, wsCtx) => {
           wsCtx
         );
         break;
-      case "MeterValues":
-        responsePayload = await meterValues.handleRequest(payload, wsCtx);
-        break;
-      case "StartTransaction":
-        responsePayload = await startTransaction.handleRequest(payload, wsCtx);
-        break;
       case "StopTransaction":
         responsePayload = await stopTransaction.handleRequest(payload, wsCtx);
-        break;
-      case "SecurityEventNotification":
-        responsePayload = await securityEventNotification.handleRequest(
-          payload,
-          wsCtx
-        );
         break;
       default:
         throw new Error(`Unknown action: ${action}`);

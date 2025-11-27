@@ -1,15 +1,18 @@
 import { logger } from "../../../lib/globals/logger";
 import { authorize } from "./authorize";
 import { bootNotification } from "./bootNotification";
+import { dataTransfer } from "./dataTransfer";
+import { diagnosticsStatusNotification } from "./diagnosticsStatusNotification";
+import { firmwareStatusNotification } from "./firmwareStatusNotification";
 import { heartbeat } from "./heartbeat";
-import { statusNotification } from "./statusNotification";
+import { meterValues } from "./meterValues";
 import { securityEventNotification } from "./securityEventNotification";
+import { startTransaction } from "./startTransaction";
+import { statusNotification } from "./statusNotification";
+import { stopTransaction } from "./stopTransaction";
 import { CallResultSchema, CallSchema } from "../types";
 import type { WSCustomContext } from "../WSCustomContext";
 import type { z } from "zod";
-import { meterValues } from "./meterValues";
-import { startTransaction } from "./startTransaction";
-import { stopTransaction } from "./stopTransaction";
 
 export const handler = async (
   message: z.infer<typeof CallSchema>,
@@ -37,8 +40,41 @@ export const handler = async (
         responsePayload = await bootNotification.handleRequest(payload, wsCtx);
         break;
 
+      case "DataTransfer":
+        responsePayload = await dataTransfer.handleRequest(payload, wsCtx);
+        break;
+
+      case "DiagnosticsStatusNotification":
+        responsePayload = await diagnosticsStatusNotification.handleRequest(
+          payload,
+          wsCtx
+        );
+        break;
+
+      case "FirmwareStatusNotification":
+        responsePayload = await firmwareStatusNotification.handleRequest(
+          payload,
+          wsCtx
+        );
+        break;
+
       case "Heartbeat":
         responsePayload = await heartbeat.handleRequest(payload, wsCtx);
+        break;
+
+      case "MeterValues":
+        responsePayload = await meterValues.handleRequest(payload, wsCtx);
+        break;
+
+      case "SecurityEventNotification":
+        responsePayload = await securityEventNotification.handleRequest(
+          payload,
+          wsCtx
+        );
+        break;
+
+      case "StartTransaction":
+        responsePayload = await startTransaction.handleRequest(payload, wsCtx);
         break;
 
       case "StatusNotification":
@@ -48,23 +84,8 @@ export const handler = async (
         );
         break;
 
-      case "MeterValues":
-        responsePayload = await meterValues.handleRequest(payload, wsCtx);
-        break;
-
-      case "StartTransaction":
-        responsePayload = await startTransaction.handleRequest(payload, wsCtx);
-        break;
-
       case "StopTransaction":
         responsePayload = await stopTransaction.handleRequest(payload, wsCtx);
-        break;
-
-      case "SecurityEventNotification":
-        responsePayload = await securityEventNotification.handleRequest(
-          payload,
-          wsCtx
-        );
         break;
 
       default:
