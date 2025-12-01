@@ -3,3 +3,250 @@
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, cupcake;
 }
+
+/* Pikaday theme - uses DaisyUI CSS variables for light/dark support */
+.pika-single {
+  z-index: 9999 !important;
+  display: block;
+  position: relative;
+  color: var(--color-base-content) !important;
+  background: var(--color-base-100) !important;
+  border: 1px solid color-mix(in oklch, var(--color-base-content) 20%, transparent) !important;
+  border-radius: var(--radius-field, 0.5rem) !important;
+  font-family: inherit;
+  
+}
+
+.pika-single:before,
+.pika-single:after {
+  content: " ";
+  display: table;
+}
+
+.pika-single:after {
+  clear: both;
+}
+
+.pika-single.is-hidden {
+  display: none;
+}
+
+.pika-single.is-bound {
+  position: absolute;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.pika-lendar {
+  float: left;
+  width: 240px;
+  margin: 8px;
+}
+
+.pika-title {
+  position: relative;
+  text-align: center;
+}
+
+.pika-title select {
+  cursor: pointer;
+  position: absolute;
+  z-index: 9998;
+  margin: 0;
+  left: 0;
+  top: 5px;
+  opacity: 0;
+}
+
+.pika-label {
+  display: inline-block;
+  position: relative;
+  z-index: 9999;
+  overflow: hidden;
+  margin: 0;
+  padding: 5px 3px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: bold;
+  color: var(--color-base-content) !important;
+  background-color: var(--color-base-100) !important;
+}
+
+.pika-prev,
+.pika-next {
+  display: block;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  border: 0;
+  padding: 0;
+  width: 20px;
+  height: 30px;
+  text-indent: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  background-color: transparent;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 75% 75%;
+  opacity: 0.5;
+}
+
+.pika-prev:hover,
+.pika-next:hover {
+  opacity: 1;
+}
+
+.pika-prev {
+  float: left;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>');
+}
+
+.pika-next {
+  float: right;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>');
+}
+
+/* Use mask for arrows to support theme colors */
+.pika-prev,
+.pika-next {
+  background-color: var(--color-base-content);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: 75% 75%;
+  mask-size: 75% 75%;
+}
+
+.pika-prev {
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>');
+  background-image: none;
+}
+
+.pika-next {
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>');
+  background-image: none;
+}
+
+.pika-prev.is-disabled,
+.pika-next.is-disabled {
+  cursor: default;
+  opacity: 0.2;
+}
+
+.pika-select {
+  display: inline-block;
+}
+
+.pika-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 0;
+}
+
+.pika-table th,
+.pika-table td {
+  width: 14.285714285714286%;
+  padding: 0;
+}
+
+.pika-table th {
+  color: var(--color-base-content) !important;
+  opacity: 0.6;
+  font-size: 12px;
+  line-height: 25px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.pika-table abbr {
+  border-bottom: none;
+  cursor: help;
+}
+
+.pika-button {
+  cursor: pointer;
+  display: block;
+  box-sizing: border-box;
+  outline: none;
+  border: 0;
+  margin: 0;
+  width: 100%;
+  padding: 5px;
+  color: var(--color-base-content) !important;
+  font-size: 12px;
+  line-height: 15px;
+  text-align: center;
+  background: transparent !important;
+  border-radius: var(--radius-field, 0.25rem);
+}
+
+.pika-week {
+  font-size: 11px;
+  color: var(--color-base-content) !important;
+  opacity: 0.5;
+}
+
+.is-today .pika-button {
+  color: var(--color-primary) !important;
+  font-weight: bold;
+}
+
+.is-selected .pika-button,
+.has-event .pika-button {
+  color: var(--color-primary-content) !important;
+  font-weight: bold;
+  background: var(--color-primary) !important;
+  box-shadow: none;
+  border-radius: var(--radius-field, 0.25rem);
+}
+
+.has-event .pika-button {
+  background: var(--color-secondary) !important;
+}
+
+.is-disabled .pika-button,
+.is-inrange .pika-button {
+  background: var(--color-base-200) !important;
+}
+
+.is-startrange .pika-button {
+  color: var(--color-primary-content) !important;
+  background: var(--color-primary) !important;
+  box-shadow: none;
+  border-radius: var(--radius-field, 0.25rem);
+}
+
+.is-endrange .pika-button {
+  color: var(--color-primary-content) !important;
+  background: var(--color-primary) !important;
+  box-shadow: none;
+  border-radius: var(--radius-field, 0.25rem);
+}
+
+.is-disabled .pika-button {
+  pointer-events: none;
+  cursor: default;
+  color: var(--color-base-content) !important;
+  opacity: 0.3;
+}
+
+.is-outside-current-month .pika-button {
+  color: var(--color-base-content) !important;
+  opacity: 0.4;
+}
+
+.is-selection-disabled {
+  pointer-events: none;
+  cursor: default;
+}
+
+.pika-button:hover,
+.pika-row.pick-whole-week:hover .pika-button {
+  color: var(--color-base-content) !important;
+  background: var(--color-base-200) !important;
+  border-radius: var(--radius-field, 0.25rem);
+}

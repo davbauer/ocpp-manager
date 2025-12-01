@@ -7,9 +7,9 @@
 	} from '$lib/queryClient';
 
 	import BasePage from '$lib/components/BasePage.svelte';
+	import TransactionExportModal from '$lib/components/TransactionExportModal.svelte';
 	import { formatDuration, intervalToDuration, subDays } from 'date-fns';
 	import Pikaday from 'pikaday';
-	import Papa from 'papaparse';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { hClient } from '$lib/hClient';
@@ -30,6 +30,18 @@
 		Tag
 	} from 'lucide-svelte';
 
+	// Check if URL has any filter params to auto-open filters
+	const hasFiltersInUrl = $derived(
+		$page.url.searchParams.has('chargerId') ||
+			$page.url.searchParams.has('connectorId') ||
+			$page.url.searchParams.has('rfidTagId') ||
+			$page.url.searchParams.has('startDate') ||
+			$page.url.searchParams.has('endDate') ||
+			$page.url.searchParams.has('status')
+	);
+
+	type TransactionStatus = 'all' | 'active' | 'completed';
+
 	function getFormattedDuration(start: string, end: string | null) {
 		if (!end) return 'Ongoing';
 		const duration = intervalToDuration({ start: new Date(start), end: new Date(end) });
@@ -43,40 +55,44 @@
 	let allLoadedTransactions = $state<any[]>([]);
 	let totalCount = $state(0);
 	let lastProcessedPage = $state(0);
+	let totalEnergyWh = $state(0);
 
-	// Watch for new transaction data and accumulate
 	$effect(() => {
-		const data = $queryTransactions.data?.data;
-		const page = currentPage;
+		const responseData = $queryTransactions.data?.data;
+		const transactions = responseData?.transactions;
+		const pg = currentPage;
 
-		if (data && page !== lastProcessedPage) {
-			// If page is 1, reset the list
-			if (page === 1) {
-				allLoadedTransactions = data;
+		if (transactions && pg !== lastProcessedPage) {
+			if (pg === 1) {
+				allLoadedTransactions = transactions;
 			} else {
-				// Append new transactions, avoiding duplicates
 				const existingIds = new Set(allLoadedTransactions.map((t) => t.id));
-				const uniqueNew = data.filter((t: any) => !existingIds.has(t.id));
+				const uniqueNew = transactions.filter((t: any) => !existingIds.has(t.id));
 				if (uniqueNew.length > 0) {
 					allLoadedTransactions = [...allLoadedTransactions, ...uniqueNew];
 				}
 			}
-
 			totalCount = $queryTransactions.data?.total_count ?? 0;
-			lastProcessedPage = page;
+			totalEnergyWh = responseData?.totalEnergyWh ?? 0;
+			lastProcessedPage = pg;
 		}
 	});
 
-	// Function to load more transactions
 	function loadMore() {
 		currentPage += 1;
 	}
 
-	const hasMore = $derived(() => {
-		return allLoadedTransactions.length < totalCount;
-	});
+	const hasMore = $derived(allLoadedTransactions.length < totalCount);
 
-	// Draft filter states
+	// Helper to reset pagination state
+	function resetPagination() {
+		currentPage = 1;
+		allLoadedTransactions = [];
+		lastProcessedPage = 0;
+		totalEnergyWh = 0;
+	}
+
+	// Draft filter states (what user is editing)
 	let draftChargerId = $state<number | undefined>(
 		$page.url.searchParams.get('chargerId')
 			? Number($page.url.searchParams.get('chargerId'))
@@ -92,10 +108,13 @@
 			? Number($page.url.searchParams.get('rfidTagId'))
 			: undefined
 	);
-	let draftStartDate = $state<string>($page.url.searchParams.get('startDate') || '');
-	let draftEndDate = $state<string>($page.url.searchParams.get('endDate') || '');
+	let draftStartDate = $state($page.url.searchParams.get('startDate') || '');
+	let draftEndDate = $state($page.url.searchParams.get('endDate') || '');
+	let draftStatus = $state<TransactionStatus>(
+		($page.url.searchParams.get('status') as TransactionStatus) || 'all'
+	);
 
-	// Applied filter states
+	// Applied filter states (what's actually being queried)
 	let selectedChargerId = $state<number | undefined>(
 		$page.url.searchParams.get('chargerId')
 			? Number($page.url.searchParams.get('chargerId'))
@@ -111,14 +130,19 @@
 			? Number($page.url.searchParams.get('rfidTagId'))
 			: undefined
 	);
-	let startDate = $state<string>($page.url.searchParams.get('startDate') || '');
-	let endDate = $state<string>($page.url.searchParams.get('endDate') || '');
+	let startDate = $state($page.url.searchParams.get('startDate') || '');
+	let endDate = $state($page.url.searchParams.get('endDate') || '');
+	let selectedStatus = $state<TransactionStatus>(
+		($page.url.searchParams.get('status') as TransactionStatus) || 'all'
+	);
 
 	let startDateInput: HTMLInputElement;
 	let endDateInput: HTMLInputElement;
-	let isExporting = $state(false);
+	let startPicker: Pikaday | null = null;
+	let endPicker: Pikaday | null = null;
 
 	let deleteModal: HTMLDialogElement;
+	let exportModal: TransactionExportModal;
 	let transactionToDelete = $state<{ id: number; chargerName: string; tagName: string } | null>(
 		null
 	);
@@ -131,21 +155,25 @@
 
 	$effect(() => {
 		if (draftChargerId) {
-			// Fetch connectors for the selected charger
+			const chargerId = draftChargerId;
 			hClient.connector.charger[':id'].detail
-				.$get({
-					param: { id: draftChargerId.toString() }
-				})
+				.$get({ param: { id: chargerId.toString() } })
 				.then(async (response) => {
-					const data = await response.json();
-					availableConnectors = data.data || [];
+					// Only update if charger hasn't changed
+					if (draftChargerId === chargerId) {
+						const data = await response.json();
+						availableConnectors = data.data || [];
+					}
 				})
 				.catch((error) => {
 					console.error('Failed to fetch connectors:', error);
-					availableConnectors = [];
+					if (draftChargerId === chargerId) {
+						availableConnectors = [];
+					}
 				});
 		} else {
 			availableConnectors = [];
+			draftConnectorId = undefined;
 		}
 	});
 
@@ -154,7 +182,8 @@
 		connectorId: selectedConnectorId,
 		rfidTagId: selectedRfidTagId,
 		startDate: startDate ? new Date(startDate) : undefined,
-		endDate: endDate ? new Date(endDate) : undefined
+		endDate: endDate ? new Date(endDate) : undefined,
+		status: selectedStatus !== 'all' ? selectedStatus : undefined
 	});
 
 	const queryTransactions = $derived(
@@ -162,25 +191,32 @@
 	);
 	const mutationTransactionDelete = createMutationTransactionDelete();
 
-	const confirmDelete = (transaction: any) => {
+	// Export filters for the modal
+	const exportFilters = $derived({
+		chargerId: selectedChargerId,
+		connectorId: selectedConnectorId,
+		rfidTagId: selectedRfidTagId,
+		startDate: startDate || undefined,
+		endDate: endDate || undefined,
+		status: selectedStatus !== 'all' ? selectedStatus : undefined
+	});
+
+	function confirmDelete(transaction: any) {
 		transactionToDelete = {
 			id: transaction.id,
 			chargerName: transaction.chargeAuthorization?.charger?.friendlyName ?? 'Unknown',
 			tagName: transaction.chargeAuthorization?.tag?.friendlyName ?? 'Unknown'
 		};
 		deleteModal?.showModal();
-	};
+	}
 
-	const handleDelete = () => {
+	function handleDelete() {
 		if (transactionToDelete) {
 			$mutationTransactionDelete.mutate(
 				{ id: transactionToDelete.id },
 				{
 					onSuccess: () => {
-						// Reset state for fresh load
-						currentPage = 1;
-						allLoadedTransactions = [];
-						lastProcessedPage = 0;
+						resetPagination();
 						deleteModal?.close();
 						transactionToDelete = null;
 					},
@@ -190,12 +226,12 @@
 				}
 			);
 		}
-	};
+	}
 
-	const cancelDelete = () => {
+	function cancelDelete() {
 		deleteModal?.close();
 		transactionToDelete = null;
-	};
+	}
 
 	function updateURL() {
 		const params = new URLSearchParams();
@@ -204,6 +240,7 @@
 		if (selectedRfidTagId) params.set('rfidTagId', String(selectedRfidTagId));
 		if (startDate) params.set('startDate', startDate);
 		if (endDate) params.set('endDate', endDate);
+		if (selectedStatus !== 'all') params.set('status', selectedStatus);
 
 		const url = params.toString() ? `?${params.toString()}` : '/transactions';
 		goto(url, { replaceState: true, noScroll: true });
@@ -215,9 +252,8 @@
 		selectedRfidTagId = draftRfidTagId;
 		startDate = draftStartDate;
 		endDate = draftEndDate;
-		currentPage = 1;
-		allLoadedTransactions = []; // Reset accumulated transactions
-		lastProcessedPage = 0; // Reset last processed page
+		selectedStatus = draftStatus;
+		resetPagination();
 		updateURL();
 	}
 
@@ -227,175 +263,155 @@
 		draftRfidTagId = undefined;
 		draftStartDate = '';
 		draftEndDate = '';
+		draftStatus = 'all';
 		selectedChargerId = undefined;
 		selectedConnectorId = undefined;
 		selectedRfidTagId = undefined;
 		startDate = '';
 		endDate = '';
-		currentPage = 1;
-		allLoadedTransactions = []; // Reset accumulated transactions
-		lastProcessedPage = 0; // Reset last processed page
+		selectedStatus = 'all';
+		resetPagination();
 		goto('/transactions', { replaceState: true, noScroll: true });
 	}
 
-	function setDatePreset(preset: 'today' | 'last24h' | 'last7d' | 'last30d') {
+	function setDatePreset(preset: 'today' | 'last7d' | 'last30d') {
 		const now = new Date();
 		const tomorrow = subDays(now, -1);
 		const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
 		switch (preset) {
 			case 'today':
-			case 'last24h':
-				// Both mean today since filtering is day-based
 				draftStartDate = formatDate(now);
 				draftEndDate = formatDate(tomorrow);
 				break;
 			case 'last7d':
-				draftStartDate = formatDate(subDays(now, 6)); // 7 days including today
+				draftStartDate = formatDate(subDays(now, 6));
 				draftEndDate = formatDate(tomorrow);
 				break;
 			case 'last30d':
-				draftStartDate = formatDate(subDays(now, 29)); // 30 days including today
+				draftStartDate = formatDate(subDays(now, 29));
 				draftEndDate = formatDate(tomorrow);
 				break;
 		}
-
-		// Automatically apply filters after setting preset
-		selectedChargerId = draftChargerId;
-		selectedConnectorId = draftConnectorId;
-		selectedRfidTagId = draftRfidTagId;
-		startDate = draftStartDate;
-		endDate = draftEndDate;
-		currentPage = 1;
-		allLoadedTransactions = [];
-		lastProcessedPage = 0;
-		updateURL();
+		applyFilters();
 	}
 
-	async function exportToCSV() {
-		const loadingToast = toast.loading('Exporting transactions...');
-		try {
-			isExporting = true;
+	// Export columns configuration
+	const exportColumns = [
+		{ key: 'transactionId', label: 'Transaction ID' },
+		{ key: 'createdAt', label: 'Created At' },
+		{ key: 'startTime', label: 'Start Time' },
+		{ key: 'endTime', label: 'End Time' },
+		{ key: 'duration', label: 'Duration' },
+		{ key: 'currentStatus', label: 'Current Status' },
+		{ key: 'transactionStatus', label: 'Transaction Status' },
+		{ key: 'chargerName', label: 'Charger Name' },
+		{ key: 'chargerShortcode', label: 'Charger Shortcode' },
+		{ key: 'chargerVendor', label: 'Charger Vendor' },
+		{ key: 'chargerModel', label: 'Charger Model' },
+		{ key: 'connectorId', label: 'Connector ID' },
+		{ key: 'rfidTagName', label: 'RFID Tag Name' },
+		{ key: 'rfidTagNumber', label: 'RFID Tag Number' },
+		{ key: 'meterStartWh', label: 'Meter Start (Wh)' },
+		{ key: 'meterStopWh', label: 'Meter Stop (Wh)' },
+		{ key: 'energyDeliveredWh', label: 'Energy Delivered (Wh)' },
+		{ key: 'energyDeliveredKwh', label: 'Energy Delivered (kWh)' },
+		{ key: 'estimatedEnergyWh', label: 'Estimated Energy (Wh)' },
+		{ key: 'estimatedEnergyKwh', label: 'Estimated Energy (kWh)' },
+		{ key: 'stopReason', label: 'Stop Reason' },
+		{ key: 'paymentStatus', label: 'Payment Status' }
+	] as const;
 
-			const params = new URLSearchParams();
-			params.set('limit', '1000000');
-			params.set('offset', '0');
-			if (selectedChargerId) params.set('chargerId', String(selectedChargerId));
-			if (selectedConnectorId) params.set('connectorId', String(selectedConnectorId));
-			if (selectedRfidTagId) params.set('rfidTagId', String(selectedRfidTagId));
-			if (startDate) params.set('startDate', startDate);
-			if (endDate) params.set('endDate', endDate);
+	// Pikaday setup with sync
+	$effect(() => {
+		if (!startDateInput) return;
 
-			const response = await hClient.transaction.detail.$get({ query: Object.fromEntries(params) });
-			const data = await response.json();
-
-			if (!data.data || data.data.length === 0) {
-				toast.error('No transactions to export', { id: loadingToast });
-				return;
+		startPicker = new Pikaday({
+			field: startDateInput,
+			format: 'YYYY-MM-DD',
+			onSelect: (date: Date) => {
+				// Use local date components to avoid timezone issues
+				draftStartDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 			}
+		});
 
-			const csvData = data.data.map((t: any) => ({
-				'Transaction ID': t.id,
-				'Created At': t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A',
-				'Start Time': t.startTime ? new Date(t.startTime).toLocaleString() : 'N/A',
-				'End Time': t.stopTime ? new Date(t.stopTime).toLocaleString() : 'Ongoing',
-				Duration: t.stopTime ? getFormattedDuration(t.startTime, t.stopTime) : 'Ongoing',
-				'Current Status': t.stopTime ? 'Completed' : 'Active',
-				'Transaction Status': t.status || 'N/A',
-				'Charger Name': t.chargeAuthorization?.charger?.friendlyName || 'Unknown',
-				'Charger Shortcode': t.chargeAuthorization?.charger?.shortcode || 'N/A',
-				'Charger Vendor': t.chargeAuthorization?.charger?.vendor || 'N/A',
-				'Charger Model': t.chargeAuthorization?.charger?.model || 'N/A',
-				'Connector ID': t.connector?.connectorId || 'N/A',
-				'RFID Tag Name': t.chargeAuthorization?.tag?.friendlyName || 'Unknown',
-				'RFID Tag Number': t.chargeAuthorization?.tag?.rfidTag || 'N/A',
-				'Meter Start (Wh)': t.meterStart || 0,
-				'Meter Stop (Wh)': t.meterStop || 'N/A',
-				'Energy Delivered (Wh)': t.energyDelivered || 0,
-				'Energy Delivered (kWh)': t.energyDelivered
-					? (t.energyDelivered / 1000).toFixed(2)
-					: '0.00',
-				'Estimated Energy (Wh)': t.estimatedEnergyDelivered?.totalEnergyDelivered || 'N/A',
-				'Estimated Energy (kWh)': t.estimatedEnergyDelivered?.totalEnergyDelivered
-					? (t.estimatedEnergyDelivered.totalEnergyDelivered / 1000).toFixed(2)
-					: 'N/A',
-				'Stop Reason': t.reason || 'N/A',
-				'Payment Status': t.paymentStatus || 'N/A'
-			}));
-
-			const csv = Papa.unparse(csvData);
-			const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-			const link = document.createElement('a');
-			const url = URL.createObjectURL(blob);
-			const timestamp = new Date().toISOString().split('T')[0];
-			link.setAttribute('href', url);
-			link.setAttribute('download', `transactions-export-${timestamp}.csv`);
-			link.style.visibility = 'hidden';
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-
-			toast.success(`Exported ${data.data.length} transactions`, { id: loadingToast });
-		} catch (error) {
-			console.error('Export error:', error);
-			toast.error('Failed to export transactions', { id: loadingToast });
-		} finally {
-			isExporting = false;
-		}
-	}
+		return () => {
+			startPicker?.destroy();
+			startPicker = null;
+		};
+	});
 
 	$effect(() => {
-		if (draftChargerId === undefined) {
-			draftConnectorId = undefined;
+		if (!endDateInput) return;
+
+		endPicker = new Pikaday({
+			field: endDateInput,
+			format: 'YYYY-MM-DD',
+			onSelect: (date: Date) => {
+				// Use local date components to avoid timezone issues
+				draftEndDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+			}
+		});
+
+		return () => {
+			endPicker?.destroy();
+			endPicker = null;
+		};
+	});
+
+	// Sync Pikaday displays when draft dates change
+	$effect(() => {
+		if (startPicker) {
+			if (draftStartDate) {
+				const pickerDate = startPicker.getDate();
+				const currentDateStr = pickerDate
+					? `${pickerDate.getFullYear()}-${String(pickerDate.getMonth() + 1).padStart(2, '0')}-${String(pickerDate.getDate()).padStart(2, '0')}`
+					: null;
+				if (currentDateStr !== draftStartDate) {
+					// Parse as local date by splitting the string
+					const [year, month, day] = draftStartDate.split('-').map(Number);
+					startPicker.setDate(new Date(year, month - 1, day), true);
+				}
+			} else {
+				startPicker.setDate(null as unknown as Date, true);
+			}
 		}
 	});
 
 	$effect(() => {
-		if (startDateInput) {
-			const startPicker = new Pikaday({
-				field: startDateInput,
-				format: 'YYYY-MM-DD',
-				onSelect: (date: Date) => {
-					draftStartDate = date.toISOString().split('T')[0];
+		if (endPicker) {
+			if (draftEndDate) {
+				const pickerDate = endPicker.getDate();
+				const currentDateStr = pickerDate
+					? `${pickerDate.getFullYear()}-${String(pickerDate.getMonth() + 1).padStart(2, '0')}-${String(pickerDate.getDate()).padStart(2, '0')}`
+					: null;
+				if (currentDateStr !== draftEndDate) {
+					// Parse as local date by splitting the string
+					const [year, month, day] = draftEndDate.split('-').map(Number);
+					endPicker.setDate(new Date(year, month - 1, day), true);
 				}
-			});
-			return () => startPicker.destroy();
+			} else {
+				endPicker.setDate(null as unknown as Date, true);
+			}
 		}
-		return undefined;
-	});
-
-	$effect(() => {
-		if (endDateInput) {
-			const endPicker = new Pikaday({
-				field: endDateInput,
-				format: 'YYYY-MM-DD',
-				onSelect: (date: Date) => {
-					draftEndDate = date.toISOString().split('T')[0];
-				}
-			});
-			return () => endPicker.destroy();
-		}
-		return undefined;
 	});
 </script>
 
 <BasePage title="Transactions">
 	{#snippet actions()}
-		<button class="btn btn-sm gap-2" onclick={exportToCSV} disabled={isExporting}>
-			{#if isExporting}
-				<span class="loading loading-spinner loading-xs"></span>
-				Exporting...
-			{:else}
-				<Download class="size-4" />
-				Export CSV
-			{/if}
+		<button class="btn btn-sm gap-2" onclick={() => exportModal?.open()}>
+			<Download class="size-4" />
+			Export CSV
 		</button>
 	{/snippet}
 
 	<!-- Filters -->
-	<Collapsible.Root class="bg-base-200 border-base-300 mb-6 overflow-hidden rounded-xl border">
+	<Collapsible.Root
+		defaultOpen={hasFiltersInUrl}
+		class="bg-base-200 border-base-300 mb-6 overflow-hidden rounded-xl border"
+	>
 		<Collapsible.Trigger
-			class="hover:bg-base-300 flex w-full items-center justify-between px-6 py-4 text-left transition-colors"
+			class="hover:bg-base-300 flex w-full cursor-pointer items-center justify-between px-6 py-4 text-left transition-colors"
 		>
 			<div class="flex items-center gap-2 font-semibold">
 				<Filter class="size-5" />
@@ -469,31 +485,51 @@
 							{/if}
 						</select>
 					</div>
+
+					<div class="form-control w-36">
+						<label class="label py-1" for="status-filter">
+							<span class="label-text text-xs font-medium">Status</span>
+						</label>
+						<select
+							id="status-filter"
+							class="select select-bordered select-sm w-full"
+							bind:value={draftStatus}
+						>
+							<option value="all">All</option>
+							<option value="active">Active</option>
+							<option value="completed">Completed</option>
+						</select>
+					</div>
+
 					<div class="form-control w-40">
-						<label class="label py-1" for="start-date">
-							<span class="label-text text-xs font-medium">Start Date</span>
+						<label class="label py-1" for="sd">
+							<span class="label-text text-xs font-medium">From Date</span>
 						</label>
 						<input
-							id="start-date"
+							id="sd"
+							name="sd"
 							type="text"
 							class="input input-bordered input-sm pika-single w-full"
 							bind:this={startDateInput}
 							bind:value={draftStartDate}
 							placeholder="YYYY-MM-DD"
+							autocomplete="one-time-code"
 						/>
 					</div>
 
 					<div class="form-control w-40">
-						<label class="label py-1" for="end-date">
-							<span class="label-text text-xs font-medium">End Date</span>
+						<label class="label py-1" for="ed">
+							<span class="label-text text-xs font-medium">To Date</span>
 						</label>
 						<input
-							id="end-date"
+							id="ed"
+							name="ed"
 							type="text"
 							class="input input-bordered input-sm pika-single w-full"
 							bind:this={endDateInput}
 							bind:value={draftEndDate}
 							placeholder="YYYY-MM-DD"
+							autocomplete="one-time-code"
 						/>
 					</div>
 
@@ -528,181 +564,215 @@
 			<span class="loading loading-spinner loading-lg text-primary mb-4"></span>
 			<p class="text-sm opacity-60">Loading transactions...</p>
 		</div>
-	{:else if allLoadedTransactions.length > 0}
-		<div class="space-y-4">
-			{#each allLoadedTransactions as transaction (transaction.id)}
-				{@const isActive = !transaction.stopTime}
-				{@const energy = transaction.energyDelivered
-					? (transaction.energyDelivered / 1000).toFixed(2)
-					: transaction.estimatedEnergyDelivered?.totalEnergyDelivered
-						? (transaction.estimatedEnergyDelivered.totalEnergyDelivered / 1000).toFixed(2)
-						: null}
-
-				<div
-					class="card bg-base-100 border-base-300 overflow-hidden border shadow-md transition-shadow hover:shadow-lg {isActive
-						? 'ring-primary/30 ring-2'
-						: ''}"
-				>
-					<!-- Header -->
-					<div
-						class="from-base-200 to-base-300 border-base-300 flex items-center justify-between border-b bg-gradient-to-r px-6 py-4"
-					>
-						<div class="flex items-center gap-3">
-							<div
-								class="bg-base-100 rounded-xl p-3 shadow-sm {isActive
-									? 'ring-primary/50 ring-2'
-									: ''}"
-							>
-								<Zap class="size-6 {isActive ? 'text-primary animate-pulse' : 'opacity-60'}" />
-							</div>
-							<div>
-								<h3 class="text-lg font-bold">Transaction #{transaction.id}</h3>
-								<div class="mt-1 flex items-center gap-2">
-									<span class="badge badge-{isActive ? 'primary' : 'success'} badge-sm">
-										{isActive ? 'Active' : 'Completed'}
-									</span>
-									{#if transaction.paymentStatus}
-										<span class="badge badge-ghost badge-sm">{transaction.paymentStatus}</span>
-									{/if}
-								</div>
-							</div>
-						</div>
-
-						<button
-							class="btn btn-circle btn-sm btn-ghost text-error"
-							onclick={() => confirmDelete(transaction)}
-							title="Delete Transaction"
-						>
-							<Trash2 class="size-4" />
-						</button>
-					</div>
-
-					<!-- Content -->
-					<div class="px-6 py-4">
-						<div class="grid gap-4 md:grid-cols-2">
-							<!-- Left Column -->
-							<div class="space-y-3">
-								<div class="flex items-center gap-3">
-									<Zap class="size-4 opacity-60" />
-									<div class="flex-1">
-										<div class="text-xs opacity-60">Charger</div>
-										<div class="font-semibold">
-											{transaction.chargeAuthorization?.charger?.friendlyName ?? 'Unknown'}
-										</div>
-									</div>
-								</div>
-
-								<div class="flex items-center gap-3">
-									<Plug class="size-4 opacity-60" />
-									<div class="flex-1">
-										<div class="text-xs opacity-60">Connector</div>
-										<div class="font-semibold">#{transaction.connector?.connectorId ?? 'N/A'}</div>
-									</div>
-								</div>
-
-								<div class="flex items-center gap-3">
-									<Tag class="size-4 opacity-60" />
-									<div class="flex-1">
-										<div class="text-xs opacity-60">RFID Tag</div>
-										<div class="font-semibold">
-											{transaction.chargeAuthorization?.tag?.friendlyName ?? 'Unknown'}
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<!-- Right Column -->
-							<div class="space-y-3">
-								<div class="flex items-center gap-3">
-									<Calendar class="size-4 opacity-60" />
-									<div class="flex-1">
-										<div class="text-xs opacity-60">Started</div>
-										<div class="font-semibold">
-											{new Date(transaction.startTime).toLocaleString()}
-										</div>
-									</div>
-								</div>
-
-								<div class="flex items-center gap-3">
-									<Clock class="size-4 opacity-60" />
-									<div class="flex-1">
-										<div class="text-xs opacity-60">Duration</div>
-										<div class="font-semibold">
-											{getFormattedDuration(transaction.startTime, transaction.stopTime)}
-										</div>
-									</div>
-								</div>
-
-								<div class="flex items-center gap-3">
-									<Battery class="size-4 opacity-60" />
-									<div class="flex-1">
-										<div class="text-xs opacity-60">Energy Delivered</div>
-										<div class="font-semibold">
-											{#if energy}
-												<span class="text-primary">{energy} kWh</span>
-												{#if transaction.estimatedEnergyDelivered && !transaction.energyDelivered}
-													<span class="text-xs opacity-60">(estimated)</span>
-												{/if}
-											{:else}
-												<span class="opacity-60">N/A</span>
-											{/if}
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						{#if transaction.reason}
-							<div class="bg-base-200 mt-4 rounded-lg p-3">
-								<div class="flex items-center gap-2 text-sm">
-									<AlertCircle class="size-4 opacity-60" />
-									<span class="opacity-60">Stop Reason:</span>
-									<span class="font-semibold">{transaction.reason}</span>
-								</div>
-							</div>
-						{/if}
-					</div>
+	{:else}
+		<!-- Stats Summary -->
+		<div class="stats bg-base-100 border-base-300 mb-6 w-full border shadow-md">
+			<div class="stat">
+				<div class="stat-figure text-primary">
+					<Zap class="size-8" />
 				</div>
-			{/each}
+				<div class="stat-title">Total Energy</div>
+				<div class="stat-value text-primary">
+					{(totalEnergyWh / 1000).toFixed(2)} kWh
+				</div>
+				<div class="stat-desc">
+					{#if selectedChargerId || selectedConnectorId || selectedRfidTagId || startDate || endDate}
+						Filtered results
+					{:else}
+						All transactions
+					{/if}
+				</div>
+			</div>
+			<div class="stat">
+				<div class="stat-figure text-secondary">
+					<Battery class="size-8" />
+				</div>
+				<div class="stat-title">Transactions</div>
+				<div class="stat-value text-secondary">{totalCount}</div>
+				<div class="stat-desc">
+					{allLoadedTransactions.length} loaded
+				</div>
+			</div>
 		</div>
 
-		<!-- Load More Button -->
-		{#if hasMore()}
-			<div class="mt-8 flex justify-center">
-				<button
-					class="btn btn-primary gap-2"
-					onclick={loadMore}
-					disabled={$queryTransactions.isPending}
-				>
-					{#if $queryTransactions.isPending && currentPage > 1}
-						<span class="loading loading-spinner loading-sm"></span>
-						Loading...
-					{:else}
-						Load More
-					{/if}
-				</button>
+		{#if allLoadedTransactions.length > 0}
+			<div class="space-y-4">
+				{#each allLoadedTransactions as transaction (transaction.id)}
+					{@const isActive = !transaction.stopTime}
+					{@const energy = transaction.energyDelivered
+						? (transaction.energyDelivered / 1000).toFixed(2)
+						: transaction.estimatedEnergyDelivered?.totalEnergyDelivered
+							? (transaction.estimatedEnergyDelivered.totalEnergyDelivered / 1000).toFixed(2)
+							: null}
+
+					<div
+						class="card bg-base-100 border-base-300 overflow-hidden border shadow-md transition-shadow hover:shadow-lg {isActive
+							? 'ring-primary/30 ring-2'
+							: ''}"
+					>
+						<!-- Header -->
+						<div
+							class="from-base-200 to-base-300 border-base-300 flex items-center justify-between border-b bg-gradient-to-r px-6 py-4"
+						>
+							<div class="flex items-center gap-3">
+								<div
+									class="bg-base-100 rounded-xl p-3 shadow-sm {isActive
+										? 'ring-primary/50 ring-2'
+										: ''}"
+								>
+									<Zap class="size-6 {isActive ? 'text-primary animate-pulse' : 'opacity-60'}" />
+								</div>
+								<div>
+									<h3 class="text-lg font-bold">Transaction #{transaction.id}</h3>
+									<div class="mt-1 flex items-center gap-2">
+										<span class="badge badge-{isActive ? 'primary' : 'success'} badge-sm">
+											{isActive ? 'Active' : 'Completed'}
+										</span>
+										{#if transaction.paymentStatus}
+											<span class="badge badge-ghost badge-sm">{transaction.paymentStatus}</span>
+										{/if}
+									</div>
+								</div>
+							</div>
+
+							<button
+								class="btn btn-circle btn-sm btn-ghost text-error"
+								onclick={() => confirmDelete(transaction)}
+								title="Delete Transaction"
+							>
+								<Trash2 class="size-4" />
+							</button>
+						</div>
+
+						<!-- Content -->
+						<div class="px-6 py-4">
+							<div class="grid gap-4 md:grid-cols-2">
+								<!-- Left Column -->
+								<div class="space-y-3">
+									<div class="flex items-center gap-3">
+										<Zap class="size-4 opacity-60" />
+										<div class="flex-1">
+											<div class="text-xs opacity-60">Charger</div>
+											<div class="font-semibold">
+												{transaction.chargeAuthorization?.charger?.friendlyName ?? 'Unknown'}
+											</div>
+										</div>
+									</div>
+
+									<div class="flex items-center gap-3">
+										<Plug class="size-4 opacity-60" />
+										<div class="flex-1">
+											<div class="text-xs opacity-60">Connector</div>
+											<div class="font-semibold">
+												#{transaction.connector?.connectorId ?? 'N/A'}
+											</div>
+										</div>
+									</div>
+
+									<div class="flex items-center gap-3">
+										<Tag class="size-4 opacity-60" />
+										<div class="flex-1">
+											<div class="text-xs opacity-60">RFID Tag</div>
+											<div class="font-semibold">
+												{transaction.chargeAuthorization?.tag?.friendlyName ?? 'Unknown'}
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Right Column -->
+								<div class="space-y-3">
+									<div class="flex items-center gap-3">
+										<Calendar class="size-4 opacity-60" />
+										<div class="flex-1">
+											<div class="text-xs opacity-60">Started</div>
+											<div class="font-semibold">
+												{new Date(transaction.startTime).toLocaleString()}
+											</div>
+										</div>
+									</div>
+
+									<div class="flex items-center gap-3">
+										<Clock class="size-4 opacity-60" />
+										<div class="flex-1">
+											<div class="text-xs opacity-60">Duration</div>
+											<div class="font-semibold">
+												{getFormattedDuration(transaction.startTime, transaction.stopTime)}
+											</div>
+										</div>
+									</div>
+
+									<div class="flex items-center gap-3">
+										<Battery class="size-4 opacity-60" />
+										<div class="flex-1">
+											<div class="text-xs opacity-60">Energy Delivered</div>
+											<div class="font-semibold">
+												{#if energy}
+													<span class="text-primary">{energy} kWh</span>
+													{#if transaction.estimatedEnergyDelivered && !transaction.energyDelivered}
+														<span class="text-xs opacity-60">(estimated)</span>
+													{/if}
+												{:else}
+													<span class="opacity-60">N/A</span>
+												{/if}
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							{#if transaction.reason}
+								<div class="bg-base-200 mt-4 rounded-lg p-3">
+									<div class="flex items-center gap-2 text-sm">
+										<AlertCircle class="size-4 opacity-60" />
+										<span class="opacity-60">Stop Reason:</span>
+										<span class="font-semibold">{transaction.reason}</span>
+									</div>
+								</div>
+							{/if}
+						</div>
+					</div>
+				{/each}
 			</div>
+
+			<!-- Load More Button -->
+			{#if hasMore}
+				<div class="mt-8 flex justify-center">
+					<button
+						class="btn btn-primary gap-2"
+						onclick={loadMore}
+						disabled={$queryTransactions.isPending}
+					>
+						{#if $queryTransactions.isPending && currentPage > 1}
+							<span class="loading loading-spinner loading-sm"></span>
+							Loading...
+						{:else}
+							Load More
+						{/if}
+					</button>
+				</div>
+			{:else}
+				<div class="mt-8 text-center text-sm opacity-60">
+					All transactions loaded ({totalCount} total)
+				</div>
+			{/if}
 		{:else}
-			<div class="mt-8 text-center text-sm opacity-60">
-				All transactions loaded ({totalCount} total)
+			<div class="flex flex-col items-center justify-center py-16">
+				<div
+					class="from-primary/20 to-secondary/20 mb-6 rounded-full bg-gradient-to-br p-8 shadow-lg"
+				>
+					<Zap class="size-16 opacity-60" />
+				</div>
+				<h3 class="mb-2 text-xl font-bold">No Transactions Found</h3>
+				<p class="text-base-content/60 text-center">
+					{#if selectedChargerId || selectedRfidTagId || startDate || endDate}
+						Try adjusting your filters
+					{:else}
+						No charging sessions have been recorded yet
+					{/if}
+				</p>
 			</div>
 		{/if}
-	{:else}
-		<div class="flex flex-col items-center justify-center py-32">
-			<div
-				class="from-primary/20 to-secondary/20 mb-6 rounded-full bg-gradient-to-br p-8 shadow-lg"
-			>
-				<Zap class="size-24 opacity-60" />
-			</div>
-			<h3 class="mb-2 text-2xl font-bold">No Transactions Found</h3>
-			<p class="text-base-content/60 text-center">
-				{#if selectedChargerId || selectedRfidTagId || startDate || endDate}
-					Try adjusting your filters
-				{:else}
-					No charging sessions have been recorded yet
-				{/if}
-			</p>
-		</div>
 	{/if}
 
 	<!-- Delete Confirmation Modal -->
@@ -746,4 +816,7 @@
 			<button onclick={cancelDelete}>close</button>
 		</form>
 	</dialog>
+
+	<!-- Export Format Modal -->
+	<TransactionExportModal bind:this={exportModal} columns={exportColumns} filters={exportFilters} />
 </BasePage>

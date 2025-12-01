@@ -25,6 +25,7 @@ export const queryKeys = {
 			rfidTagId?: number;
 			startDate?: Date;
 			endDate?: Date;
+			status?: 'active' | 'completed';
 		}
 	) => ['transaction-detail', page, limit, filters],
 	transactionByChargerDetail: (chargerId: number) => ['transaction-detail', 'charger', chargerId],
@@ -446,13 +447,14 @@ export const createQueryTransactionsDetail = (
 		rfidTagId?: number;
 		startDate?: Date;
 		endDate?: Date;
+		status?: 'active' | 'completed';
 	} = {},
 	refetchInterval?: number
 ) =>
 	createQuery({
 		refetchInterval,
 		queryKey: queryKeys.transactionDetail(page, limit, filters),
-		queryFn: () => {
+		queryFn: async () => {
 			const queryParams: Record<string, string> = {
 				limit: limit.toString(),
 				offset: ((page - 1) * limit).toString()
@@ -463,8 +465,10 @@ export const createQueryTransactionsDetail = (
 			if (filters.rfidTagId) queryParams.rfidTagId = filters.rfidTagId.toString();
 			if (filters.startDate) queryParams.startDate = filters.startDate.toISOString();
 			if (filters.endDate) queryParams.endDate = filters.endDate.toISOString();
+			if (filters.status) queryParams.status = filters.status;
 
-			return hClient.transaction.detail.$get({ query: queryParams as any }).then((x) => x.json());
+			const response = await hClient.transaction.detail.$get({ query: queryParams as any });
+			return response.json();
 		}
 	});
 

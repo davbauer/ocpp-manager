@@ -77,7 +77,7 @@
 												class="flex items-center gap-3 text-base"
 												onclick={() => (mobileMenuOpen = false)}
 											>
-												<svelte:component this={item.icon} class="size-5" />
+												<item.icon class="size-5" />
 												<span>{item.label}</span>
 												{#if item.badge}
 													<span class="badge badge-sm badge-outline ml-auto">{item.badge}</span>
@@ -114,7 +114,7 @@
 								class:active={isActiveRoute(item.href)}
 								class="flex items-center gap-2"
 							>
-								<svelte:component this={item.icon} class="size-4" />
+								<item.icon class="size-4" />
 								<span>{item.label}</span>
 								{#if item.badge}
 									<span class="badge badge-xs badge-outline">{item.badge}</span>

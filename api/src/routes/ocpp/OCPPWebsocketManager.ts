@@ -176,7 +176,7 @@ class OCPPWebsocketManager {
       if (Array.isArray(parsedMessage)) {
         const [messageType, messageId]: [
           messageType: 2 | 3 | 4,
-          messageId: string
+          messageId: string,
         ] = parsedMessage as any;
 
         switch (messageType) {
@@ -190,7 +190,7 @@ class OCPPWebsocketManager {
                 number,
                 string,
                 string,
-                unknown
+                unknown,
               ];
 
               // Check if this is specifically an unknown action error
