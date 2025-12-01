@@ -365,11 +365,11 @@
 					Are you sure you want to remove <strong>{authToDelete.tagName}</strong>'s access to
 					<strong>{authToDelete.chargerName}</strong>?
 				</p>
-				<div class="alert alert-warning">
+				<div class="alert alert-info">
 					<AlertTriangle class="h-5 w-5" />
 					<div>
-						<p class="font-semibold">Note about existing transactions</p>
-						<p class="text-sm">Existing transactions will be preserved but will no longer show the charger and tag details associated with this authorization.</p>
+						<p class="font-semibold">This authorization will be deactivated</p>
+						<p class="text-sm">The tag will no longer be able to start new charging sessions on this charger. Existing transactions and their history will be preserved.</p>
 					</div>
 				</div>
 			{/if}
