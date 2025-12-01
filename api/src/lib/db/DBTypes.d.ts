@@ -34,6 +34,7 @@ export type TransactionStatus = "Active" | "Completed" | "Failed" | "Interrupted
 export interface ChargeAuthorization {
   chargerId: number;
   createdAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
   expiryDate: Timestamp | null;
   friendlyName: Generated<string>;
   id: Generated<number>;

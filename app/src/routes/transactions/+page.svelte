@@ -204,7 +204,7 @@
 	function confirmDelete(transaction: any) {
 		transactionToDelete = {
 			id: transaction.id,
-			chargerName: transaction.chargeAuthorization?.charger?.friendlyName ?? 'Unknown',
+			chargerName: transaction.charger?.friendlyName ?? 'Unknown',
 			tagName: transaction.chargeAuthorization?.tag?.friendlyName ?? 'Unknown'
 		};
 		deleteModal?.showModal();
@@ -654,7 +654,7 @@
 										<div class="flex-1">
 											<div class="text-xs opacity-60">Charger</div>
 											<div class="font-semibold">
-												{transaction.chargeAuthorization?.charger?.friendlyName ?? 'Unknown'}
+												{transaction.charger?.friendlyName ?? 'Unknown'}
 											</div>
 										</div>
 									</div>

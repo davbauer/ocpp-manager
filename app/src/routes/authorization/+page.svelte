@@ -9,9 +9,9 @@
 	} from '$lib/queryClient';
 	import { drawerStore } from '$lib/drawerStore';
 	import { z } from 'zod';
-	import { format } from 'date-fns';
+	import { format, isPast } from 'date-fns';
 	import BasePage from '$lib/components/BasePage.svelte';
-	import { CreditCard, Zap, Plus, Calendar, CheckCircle, Trash2 } from 'lucide-svelte';
+	import { CreditCard, Zap, Plus, Calendar, CheckCircle, Trash2, AlertTriangle } from 'lucide-svelte';
 	import Scrollable from '$lib/components/Scrollable.svelte';
 
 	const queryChargeAuthorizations = createQueryChargeAuthorizationDetail(1, 10000, 10000);
@@ -24,6 +24,12 @@
 
 	let deleteModal: HTMLDialogElement;
 	let authToDelete = $state<{ id: number; chargerName: string; tagName: string } | null>(null);
+
+	// Helper to check if authorization is expired
+	function isExpired(expiryDate: string | null): boolean {
+		if (!expiryDate) return false;
+		return isPast(new Date(expiryDate));
+	}
 
 	// Group authorizations by RFID tag
 	const groupedByTag = $derived.by(() => {
@@ -224,7 +230,8 @@
 							<!-- Authorized Chargers List -->
 							<div class="divide-base-300 bg-base-100 divide-y">
 								{#each authorizations as auth}
-									<div class="hover:bg-base-200/50 group px-5 py-4 transition-colors">
+									{@const expired = isExpired(auth.expiryDate)}
+									<div class="hover:bg-base-200/50 group px-5 py-4 transition-colors {expired ? 'opacity-60' : ''}">
 										<div class="flex items-center justify-between gap-4">
 											<!-- Charger Info -->
 											<div class="flex items-center gap-3">
@@ -238,10 +245,17 @@
 															>{auth.charger.shortcode}</span
 														>
 														{#if auth.expiryDate}
-															<span class="flex items-center gap-1 text-xs opacity-50">
-																<Calendar class="h-3 w-3" />
-																Expires {format(new Date(auth.expiryDate), 'MMM d, yyyy')}
-															</span>
+															{#if expired}
+																<span class="badge badge-error badge-sm gap-1">
+																	<AlertTriangle class="h-3 w-3" />
+																	Expired {format(new Date(auth.expiryDate), 'MMM d, yyyy')}
+																</span>
+															{:else}
+																<span class="flex items-center gap-1 text-xs opacity-50">
+																	<Calendar class="h-3 w-3" />
+																	Expires {format(new Date(auth.expiryDate), 'MMM d, yyyy')}
+																</span>
+															{/if}
 														{:else}
 															<span class="flex items-center gap-1 text-xs">
 																<CheckCircle class="text-success h-3 w-3" />
@@ -351,6 +365,13 @@
 					Are you sure you want to remove <strong>{authToDelete.tagName}</strong>'s access to
 					<strong>{authToDelete.chargerName}</strong>?
 				</p>
+				<div class="alert alert-warning">
+					<AlertTriangle class="h-5 w-5" />
+					<div>
+						<p class="font-semibold">Note about existing transactions</p>
+						<p class="text-sm">Existing transactions will be preserved but will no longer show the charger and tag details associated with this authorization.</p>
+					</div>
+				</div>
 			{/if}
 			<div class="modal-action">
 				<button class="btn btn-outline" onclick={cancelDelete}>Cancel</button>

@@ -4,18 +4,21 @@ import type { DB } from "../db/DBTypes";
 import { ChargeAuthorization } from "./ChargeAuthorization";
 import { db } from "../db/db";
 import { Connector } from "./Connector";
+import { Charger } from "./Charger";
 
 export interface Transaction extends Selectable<DB["transaction"]> {}
 export class Transaction extends generateBaseModel("transaction", "id") {
   async getFullDetail() {
     const [chargeAuthorization, connector, estimatedEnergyDelivered] =
       await Promise.all([
-        ChargeAuthorization.findOne({
-          eb: (eb) => eb("id", "=", this.chargeAuthorizationId),
-        }),
+        this.chargeAuthorizationId
+          ? ChargeAuthorization.findOne({
+              eb: (eb) => eb("id", "=", this.chargeAuthorizationId),
+            })
+          : null,
         Connector.findOne({
           eb: (eb) => eb("id", "=", this.connectorId),
-        }).then((x) => x?.serialize()),
+        }),
         db
           .with("energy_samples", (db) =>
             db
@@ -63,11 +66,31 @@ export class Transaction extends generateBaseModel("transaction", "id") {
           .executeTakeFirst(),
       ]);
 
+    // Get charger info - either from authorization or from connector
+    let chargerInfo: { friendlyName: string; shortcode: string } | null = null;
+    if (connector) {
+      const charger = await Charger.findOne({
+        eb: (eb) => eb("id", "=", connector.chargerId),
+      });
+      if (charger) {
+        chargerInfo = {
+          friendlyName: charger.friendlyName,
+          shortcode: charger.shortcode,
+        };
+      }
+    }
+
+    const authDetail = chargeAuthorization
+      ? await chargeAuthorization.getFullDetail()
+      : null;
+
     return {
       ...this.serialize(),
       estimatedEnergyDelivered,
-      connector,
-      chargeAuthorization: (await chargeAuthorization?.getFullDetail()) || null,
+      connector: connector?.serialize() || null,
+      chargeAuthorization: authDetail,
+      // Fallback charger info when authorization is deleted
+      charger: authDetail?.charger || chargerInfo,
     };
   }
 }

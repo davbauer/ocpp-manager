@@ -12,6 +12,51 @@ export class ChargeAuthorization extends generateBaseModel(
   "id",
   "updatedAt"
 ) {
+  /**
+   * Find many records, excluding soft-deleted by default
+   */
+  static async findManyActive(options?: Parameters<typeof ChargeAuthorization.findMany>[0]) {
+    const { eb: existingEb, ...rest } = options || {};
+    return this.findMany({
+      ...rest,
+      eb: (eb) => {
+        const conditions = [eb("deletedAt", "is", null)];
+        if (existingEb) {
+          conditions.push(existingEb(eb));
+        }
+        return eb.and(conditions);
+      },
+    });
+  }
+
+  /**
+   * Count records, excluding soft-deleted by default
+   */
+  static async countActive(options?: Parameters<typeof ChargeAuthorization.count>[0]) {
+    const { eb: existingEb, ...rest } = options || {};
+    return this.count({
+      ...rest,
+      eb: (eb) => {
+        const conditions = [eb("deletedAt", "is", null)];
+        if (existingEb) {
+          conditions.push(existingEb(eb));
+        }
+        return eb.and(conditions);
+      },
+    });
+  }
+
+  /**
+   * Soft delete this record
+   */
+  async softDelete() {
+    await db
+      .updateTable("chargeAuthorization")
+      .set({ deletedAt: new Date() })
+      .where("id", "=", this.id)
+      .execute();
+  }
+
   static async searchValidByIdTag({
     idTag,
     chargerId,
@@ -36,6 +81,7 @@ export class ChargeAuthorization extends generateBaseModel(
       .selectAll("auth")
       .where("rfidTag.rfidTag", "=", idTag)
       .where("auth.chargerId", "=", chargerId)
+      .where("auth.deletedAt", "is", null) // Exclude soft-deleted
       .where((eb) =>
         eb.or([
           eb("auth.expiryDate", "is", null),

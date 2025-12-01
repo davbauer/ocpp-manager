@@ -18,12 +18,12 @@ export const chargeAuthorization = new Hono()
       const { limit, offset } = c.req.valid("query");
 
       const [authorizations, totalCount] = await Promise.all([
-        ChargeAuthorization.findMany({
+        ChargeAuthorization.findManyActive({
           limit,
           offset,
           orderBy: { column: "createdAt", direction: "asc" },
         }),
-        ChargeAuthorization.count(),
+        ChargeAuthorization.countActive(),
       ]);
 
       return successResponse(
@@ -47,12 +47,12 @@ export const chargeAuthorization = new Hono()
       const { limit, offset } = c.req.valid("query");
 
       const [authorizations, totalCount] = await Promise.all([
-        ChargeAuthorization.findMany({
+        ChargeAuthorization.findManyActive({
           limit,
           offset,
           orderBy: { column: "createdAt", direction: "asc" },
         }),
-        ChargeAuthorization.count(),
+        ChargeAuthorization.countActive(),
       ]);
 
       return successResponse(
@@ -142,10 +142,11 @@ export const chargeAuthorization = new Hono()
       const { id } = c.req.valid("param");
 
       const authorization = await ChargeAuthorization.findOneOrThrow({
-        eb: (eb) => eb("id", "=", id),
+        eb: (eb) => eb.and([eb("id", "=", id), eb("deletedAt", "is", null)]),
       });
 
-      await authorization.delete();
+      // Soft delete instead of hard delete to preserve transaction history
+      await authorization.softDelete();
 
       return successResponse(
         c,
