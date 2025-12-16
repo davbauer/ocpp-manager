@@ -27,17 +27,24 @@ export function createApp() {
 
   typedApp.use("*", serveStatic({ path: staticPathFallbackFile }));
 
-  nodeWs.injectWebSocket(
-    serve(
-      {
-        fetch: app.fetch,
-        port: 3000,
-      },
-      (info) => {
-        logger.http(`Listening on http://0.0.0.0:${info.port}`);
-      }
-    )
+  const server = serve(
+    {
+      fetch: app.fetch,
+      port: 3000,
+    },
+    (info) => {
+      logger.http(`Listening on http://0.0.0.0:${info.port}`);
+    }
   );
+
+  // Gracefully handle socket errors (e.g., ECONNRESET from abrupt client disconnections)
+  server.on("connection", (socket) => {
+    socket.on("error", (err: NodeJS.ErrnoException) => {
+      logger.warn("Socket error", { code: err.code, message: err.message });
+    });
+  });
+
+  nodeWs.injectWebSocket(server);
 
   return typedApp;
 }
