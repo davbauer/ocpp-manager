@@ -10,12 +10,31 @@ services:
       - "3000:3000"
     depends_on:
       - postgres
+    volumes:
+      - logs_data:/workspace/api/logs
     restart: unless-stopped
+    networks:
+      - ocpp_net
+
   postgres:
     container_name: ocpp-manager-postgres
-    image: postgres:latest
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app
+    volumes:
+      - postgres_data:/var/lib/postgresql
     restart: unless-stopped
+    networks:
+      - ocpp_net
+
+volumes:
+  postgres_data:
+    name: ocpp-manager_postgres_data
+  logs_data:
+    name: ocpp-manager_logs_data
+
+networks:
+  ocpp_net:
+    driver: bridge
