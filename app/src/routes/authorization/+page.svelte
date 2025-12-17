@@ -11,7 +11,7 @@
 	import { z } from 'zod';
 	import { format, isPast } from 'date-fns';
 	import BasePage from '$lib/components/BasePage.svelte';
-	import { CreditCard, Zap, Plus, Calendar, CheckCircle, Trash2, AlertTriangle } from 'lucide-svelte';
+	import { CreditCard, Zap, Plus, Calendar, CheckCircle, Trash2, AlertTriangle, PencilLine } from 'lucide-svelte';
 	import Scrollable from '$lib/components/Scrollable.svelte';
 
 	const queryChargeAuthorizations = createQueryChargeAuthorizationDetail(1, 10000, 10000);
@@ -186,9 +186,72 @@
 		deleteModal?.close();
 		authToDelete = null;
 	};
+
+	const openCreateDrawer = () => {
+		drawerStore.open({
+			header: 'Create Authorization',
+			fields: [
+				{
+					label: 'RFID Tag',
+					name: 'rfidTagId',
+					type: 'dropdown',
+					options: $queryRfidTags.data?.data
+						? $queryRfidTags.data.data.map((tag) => ({
+								label: `${tag.friendlyName} (${tag.rfidTag})`,
+								value: tag.id.toString()
+							}))
+						: [],
+					validation: z.string().min(1)
+				},
+				{
+					label: 'Charger',
+					name: 'chargerId',
+					type: 'dropdown',
+					options: $queryChargers.data?.data
+						? $queryChargers.data.data.map((charger) => ({
+								label: `${charger.friendlyName} (${charger.vendor})`,
+								value: charger.id.toString()
+							}))
+						: [],
+					validation: z.string().min(1)
+				},
+				{
+					label: 'Expiry Date (Optional)',
+					name: 'expiryDate',
+					type: 'date',
+					defaultValue: '',
+					validation: z.string()
+				}
+			] as const,
+			actions: [
+				{
+					label: 'Create',
+					key: 'create',
+					class: 'btn-primary',
+					buttonType: 'submit',
+					callback: ({ fieldValues, closeDrawer }) => {
+						$mutationChargeAuthorizationCreate.mutate(
+							{
+								rfidTagId: parseInt(fieldValues.rfidTagId),
+								chargerId: parseInt(fieldValues.chargerId),
+								expiryDate: fieldValues.expiryDate ? new Date(fieldValues.expiryDate) : null
+							},
+							{ onSuccess: closeDrawer }
+						);
+					}
+				}
+			]
+		});
+	};
 </script>
 
 <BasePage title="Charge Authorizations">
+	{#snippet actions()}
+		<button class="btn btn-primary btn-sm gap-2" onclick={openCreateDrawer}>
+			<Plus class="h-4 w-4" />
+			Add Authorization
+		</button>
+	{/snippet}
 	<div class="container mx-auto">
 		{#if $queryChargeAuthorizations.isPending || $queryChargers.isPending || $queryRfidTags.isPending}
 			<div class="flex flex-col items-center justify-center py-32">
@@ -267,16 +330,16 @@
 											</div>
 
 											<!-- Actions -->
-											<div class="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+											<div class="flex gap-1">
 												<button
 													class="btn btn-ghost btn-xs btn-square"
 													onclick={() => editExpiry(auth)}
 													title="Edit expiry"
 												>
-													<Calendar class="h-3.5 w-3.5" />
+													<PencilLine class="h-3.5 w-3.5" />
 												</button>
 												<button
-													class="btn btn-ghost btn-xs btn-square"
+													class="btn btn-ghost btn-xs btn-square text-error"
 													onclick={() => confirmDelete(auth)}
 													title="Remove access"
 												>
