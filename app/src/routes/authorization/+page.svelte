@@ -9,6 +9,7 @@
 	} from '$lib/queryClient';
 	import { drawerStore } from '$lib/drawerStore';
 	import { z } from 'zod';
+	import toast from 'svelte-french-toast';
 	import { format, isPast } from 'date-fns';
 	import BasePage from '$lib/components/BasePage.svelte';
 	import { CreditCard, Zap, Plus, Calendar, CheckCircle, Trash2, AlertTriangle, PencilLine } from 'lucide-svelte';
@@ -25,33 +26,97 @@
 	let deleteModal: HTMLDialogElement;
 	let authToDelete = $state<{ id: number; chargerName: string; tagName: string } | null>(null);
 
-	// Helper to check if authorization is expired
+	// Check if authorization is expired
 	function isExpired(expiryDate: string | null): boolean {
 		if (!expiryDate) return false;
 		return isPast(new Date(expiryDate));
 	}
 
-	// Group authorizations by RFID tag
+	// Derived: All chargers as dropdown options - O(c) where c = charger count
+	const allChargerOptions = $derived(
+		($queryChargers.data?.data || []).map((c) => ({
+			label: `${c.friendlyName} (${c.vendor})`,
+			value: c.id.toString(),
+			id: c.id
+		}))
+	);
+
+	// Derived: Total charger count
+	const totalChargers = $derived(allChargerOptions.length);
+
+	// Derived: Map of rfidTagId -> Set of assigned charger IDs - O(a) where a = auth count
+	const assignedChargersByTag = $derived.by(() => {
+		const auths = $queryChargeAuthorizations.data?.data || [];
+		const map = new Map<number, Set<number>>();
+		for (const auth of auths) {
+			if (auth.rfidTagId) {
+				let set = map.get(auth.rfidTagId);
+				if (!set) {
+					set = new Set();
+					map.set(auth.rfidTagId, set);
+				}
+				set.add(auth.chargerId);
+			}
+		}
+		return map;
+	});
+
+	// Derived: Set of existing authorization combinations - O(a)
+	const existingCombinations = $derived(
+		new Set(($queryChargeAuthorizations.data?.data || []).map((a) => `${a.rfidTagId}-${a.chargerId}`))
+	);
+
+	// Get available chargers for a tag - O(c) lookup, cached by Svelte reactivity
+	function getAvailableChargersForTag(rfidTagId: number) {
+		const assignedIds = assignedChargersByTag.get(rfidTagId);
+		if (!assignedIds || assignedIds.size === 0) return allChargerOptions;
+		return allChargerOptions.filter((c) => !assignedIds.has(c.id));
+	}
+
+	// Get available charger count for a tag - O(1) if no assignments, O(c) otherwise
+	function getAvailableCountForTag(rfidTagId: number): number {
+		const assignedIds = assignedChargersByTag.get(rfidTagId);
+		if (!assignedIds) return totalChargers;
+		return totalChargers - assignedIds.size;
+	}
+
+	// Derived: RFID tags that have at least one available charger - O(t) where t = tag count
+	const tagsWithAvailableChargers = $derived.by(() => {
+		const tags = $queryRfidTags.data?.data || [];
+		return tags.filter((tag) => getAvailableCountForTag(tag.id) > 0);
+	});
+
+	// Derived: Authorizations grouped by RFID tag with availability count - O(a)
 	const groupedByTag = $derived.by(() => {
 		const auths = ($queryChargeAuthorizations.data?.data || []).filter((a) => a.rfidTagId && a.tag);
 		const grouped = new Map<number, typeof auths>();
 
-		auths.forEach((auth) => {
-			if (auth.rfidTagId && !grouped.has(auth.rfidTagId)) {
-				grouped.set(auth.rfidTagId, []);
-			}
+		for (const auth of auths) {
 			if (auth.rfidTagId) {
-				grouped.get(auth.rfidTagId)!.push(auth);
+				let list = grouped.get(auth.rfidTagId);
+				if (!list) {
+					list = [];
+					grouped.set(auth.rfidTagId, list);
+				}
+				list.push(auth);
 			}
-		});
+		}
 
-		return Array.from(grouped.entries()).map(([_rfidTagId, authorizations]) => ({
+		return Array.from(grouped.entries()).map(([rfidTagId, authorizations]) => ({
 			rfidTag: authorizations[0].tag!,
-			authorizations
+			authorizations,
+			availableCount: getAvailableCountForTag(rfidTagId)
 		}));
 	});
 
 	const addChargerAccess = (rfidTag: any) => {
+		const availableChargers = getAvailableChargersForTag(rfidTag.id);
+
+		if (availableChargers.length === 0) {
+			toast.error('All chargers are already assigned to this RFID tag.');
+			return;
+		}
+
 		drawerStore.open({
 			header: `Add Charger Access for ${rfidTag.friendlyName}`,
 			fields: [
@@ -59,12 +124,7 @@
 					label: 'Charger',
 					name: 'chargerId',
 					type: 'dropdown',
-					options: $queryChargers.data?.data
-						? $queryChargers.data.data.map((charger) => ({
-								label: `${charger.friendlyName} (${charger.vendor})`,
-								value: charger.id.toString()
-							}))
-						: [],
+					options: availableChargers,
 					validation: z.string().min(1)
 				},
 				{
@@ -188,6 +248,11 @@
 	};
 
 	const openCreateDrawer = () => {
+		if (tagsWithAvailableChargers.length === 0) {
+			toast.error('All RFID tags are already assigned to all chargers.');
+			return;
+		}
+
 		drawerStore.open({
 			header: 'Create Authorization',
 			fields: [
@@ -195,24 +260,17 @@
 					label: 'RFID Tag',
 					name: 'rfidTagId',
 					type: 'dropdown',
-					options: $queryRfidTags.data?.data
-						? $queryRfidTags.data.data.map((tag) => ({
-								label: `${tag.friendlyName} (${tag.rfidTag})`,
-								value: tag.id.toString()
-							}))
-						: [],
+					options: tagsWithAvailableChargers.map((tag) => ({
+						label: `${tag.friendlyName} (${tag.rfidTag})`,
+						value: tag.id.toString()
+					})),
 					validation: z.string().min(1)
 				},
 				{
 					label: 'Charger',
 					name: 'chargerId',
 					type: 'dropdown',
-					options: $queryChargers.data?.data
-						? $queryChargers.data.data.map((charger) => ({
-								label: `${charger.friendlyName} (${charger.vendor})`,
-								value: charger.id.toString()
-							}))
-						: [],
+					options: allChargerOptions.map(({ label, value }) => ({ label, value })),
 					validation: z.string().min(1)
 				},
 				{
@@ -230,10 +288,19 @@
 					class: 'btn-primary',
 					buttonType: 'submit',
 					callback: ({ fieldValues, closeDrawer }) => {
+						const rfidTagId = parseInt(fieldValues.rfidTagId);
+						const chargerId = parseInt(fieldValues.chargerId);
+
+						// Check if this combination already exists (uses derived)
+						if (existingCombinations.has(`${rfidTagId}-${chargerId}`)) {
+							toast.error('This RFID tag is already authorized for this charger.');
+							return;
+						}
+
 						$mutationChargeAuthorizationCreate.mutate(
 							{
-								rfidTagId: parseInt(fieldValues.rfidTagId),
-								chargerId: parseInt(fieldValues.chargerId),
+								rfidTagId,
+								chargerId,
 								expiryDate: fieldValues.expiryDate ? new Date(fieldValues.expiryDate) : null
 							},
 							{ onSuccess: closeDrawer }
@@ -261,7 +328,7 @@
 		{:else if groupedByTag.length > 0}
 			<Scrollable class="p-4" maxHeight="80svh">
 				<div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-					{#each groupedByTag as { rfidTag, authorizations } (`${rfidTag.id}-${authorizations.map((a) => a.id).join('-')}`)}
+					{#each groupedByTag as { rfidTag, authorizations, availableCount } (`${rfidTag.id}-${authorizations.map((a) => a.id).join('-')}`)}
 						<div class="card bg-base-100 border-base-300 overflow-hidden border shadow-sm">
 							<!-- Card Header -->
 							<div class="bg-base-200 px-5 py-4">
@@ -284,9 +351,15 @@
 								<button
 									class="btn btn-ghost btn-sm w-full gap-2"
 									onclick={() => addChargerAccess(rfidTag)}
+									disabled={availableCount === 0}
 								>
 									<Plus class="h-4 w-4" />
-									Add Charger Access
+									{#if availableCount === 0}
+										All Chargers Assigned
+									{:else}
+										Add Charger Access
+										<span class="badge badge-sm">{availableCount}/{totalChargers}</span>
+									{/if}
 								</button>
 							</div>
 
