@@ -6,6 +6,7 @@ import { Transaction } from "../../lib/models/Transaction";
 import { Connector } from "../../lib/models/Connector";
 import { successResponse } from "../../lib/helpers/apiResponse";
 import { db } from "../../lib/db/db";
+import { buildEnergyValueSql, buildEnergyExistenceCheck } from "../../lib/helpers/energyQueries";
 
 export const transaction = new Hono()
   .get(
@@ -173,36 +174,10 @@ export const transaction = new Hono()
                   .innerJoin("telemetry as tel", "tel.transactionId", "t.id")
                   .$if(!!cteFilterFn, (qb) => qb.where(cteFilterFn!))
                   .where("t.stopTime", "is", null)
-                  .where(
-                    sql<boolean>`
-                      JSONB_PATH_EXISTS(
-                        tel.meter_value::jsonb,
-                        '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register")'
-                      )
-                    `
-                  )
+                  .where(buildEnergyExistenceCheck("tel.meter_value"))
                   .select([
                     "t.id",
-                    sql<number>`
-                      (
-                        TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
-                          tel.meter_value::jsonb,
-                          '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").value'
-                        )::TEXT)::NUMERIC
-                        *
-                        CASE
-                          WHEN COALESCE(TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
-                            tel.meter_value::jsonb,
-                            '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").unit'
-                          )::TEXT), 'Wh') = 'kWh' THEN 1000
-                          WHEN COALESCE(TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
-                            tel.meter_value::jsonb,
-                            '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").unit'
-                          )::TEXT), 'Wh') = 'MWh' THEN 1000000
-                          ELSE 1
-                        END
-                      )
-                    `.as("value_wh"),
+                    buildEnergyValueSql("tel.meter_value").as("value_wh"),
                   ])
               )
               .with("per_transaction_energy", (db) =>

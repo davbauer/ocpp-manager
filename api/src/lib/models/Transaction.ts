@@ -5,6 +5,7 @@ import { ChargeAuthorization } from "./ChargeAuthorization";
 import { db } from "../db/db";
 import { Connector } from "./Connector";
 import { Charger } from "./Charger";
+import { buildEnergyValueSql, buildEnergyExistenceCheck } from "../helpers/energyQueries";
 
 export interface Transaction extends Selectable<DB["transaction"]> {}
 export class Transaction extends generateBaseModel("transaction", "id") {
@@ -24,37 +25,11 @@ export class Transaction extends generateBaseModel("transaction", "id") {
             db
               .selectFrom("telemetry")
               .select([
-                sql<number>`
-              (
-                TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
-                  telemetry.meter_value::jsonb,
-                  '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").value'
-                )::TEXT)::NUMERIC
-                *
-                CASE
-                  WHEN COALESCE(TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
-                    telemetry.meter_value::jsonb,
-                    '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").unit'
-                  )::TEXT), 'Wh') = 'kWh' THEN 1000
-                  WHEN COALESCE(TRIM(BOTH '"' FROM JSONB_PATH_QUERY_FIRST(
-                    telemetry.meter_value::jsonb,
-                    '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register").unit'
-                  )::TEXT), 'Wh') = 'MWh' THEN 1000000
-                  ELSE 1
-                END
-              )
-            `.as("value_wh"),
+                buildEnergyValueSql("telemetry.meter_value").as("value_wh"),
                 sql<string>`telemetry.created_at`.as("created_at"),
               ])
               .where("transactionId", "=", this.id)
-              .where(
-                sql<boolean>`
-              JSONB_PATH_EXISTS(
-                telemetry.meter_value::jsonb,
-                '$.raw[*].sampledValue[*] ? (@.measurand == "Energy.Active.Import.Register")'
-              )
-            `
-              )
+              .where(buildEnergyExistenceCheck("telemetry.meter_value"))
           )
           .selectFrom("energy_samples")
           .select([

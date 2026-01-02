@@ -15,14 +15,16 @@ export class ChargeAuthorization extends generateBaseModel(
   /**
    * Find many records, excluding soft-deleted by default
    */
-  static async findManyActive(options?: Parameters<typeof ChargeAuthorization.findMany>[0]) {
+  static async findManyActive(
+    options?: Parameters<typeof ChargeAuthorization.findMany>[0]
+  ) {
     const { eb: existingEb, ...rest } = options || {};
     return this.findMany({
       ...rest,
       eb: (eb) => {
         const conditions = [eb("deletedAt", "is", null)];
         if (existingEb) {
-          conditions.push(existingEb(eb));
+          conditions.push(existingEb(eb) as any);
         }
         return eb.and(conditions);
       },
@@ -32,14 +34,16 @@ export class ChargeAuthorization extends generateBaseModel(
   /**
    * Count records, excluding soft-deleted by default
    */
-  static async countActive(options?: Parameters<typeof ChargeAuthorization.count>[0]) {
+  static async countActive(
+    options?: Parameters<typeof ChargeAuthorization.count>[0]
+  ) {
     const { eb: existingEb, ...rest } = options || {};
     return this.count({
       ...rest,
       eb: (eb) => {
         const conditions = [eb("deletedAt", "is", null)];
         if (existingEb) {
-          conditions.push(existingEb(eb));
+          conditions.push(existingEb(eb) as any);
         }
         return eb.and(conditions);
       },
