@@ -20,15 +20,13 @@ export class Connector extends generateBaseModel(
   async getLatestValidTelemetry() {
     const setting = await Setting.findOneOrThrow();
 
-    const cutoffTime = new Date(
-      Date.now() -
-        (Math.max(
-          setting.meterValueSampleInterval,
-          setting.clockAlignedDataInterval
-        ) +
-          10) *
-          1000
-    );
+    // Use the larger of the two intervals, but ignore clockAlignedDataInterval if it's 0 (disabled)
+    const effectiveInterval =
+      setting.clockAlignedDataInterval > 0
+        ? Math.max(setting.meterValueSampleInterval, setting.clockAlignedDataInterval)
+        : setting.meterValueSampleInterval;
+
+    const cutoffTime = new Date(Date.now() - (effectiveInterval + 10) * 1000);
 
     const telemetryData = await db
       .selectFrom("telemetry")
